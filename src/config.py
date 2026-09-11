@@ -41,7 +41,7 @@ ATR_SL_MULTIPLIER = 1.5      # Stop loss distance = 1.5 * ATR(14)
 MAX_SL_PCT = 0.04            # Hard stop cap (max 4% risk per trade)
 
 # Feature Columns definition used across feature engineering, training, and screening
-FEATURE_COLUMNS = (
+FEATURE_COLUMNS = list((
     "return_1d", "return_3d", "return_5d", "return_10d", "return_20d",
     "vol_surge_20", "vol_surge_5", "turnover_surge",
     "rsi_14", "rsi_7", "rsi_slope_3",
@@ -50,4 +50,4 @@ FEATURE_COLUMNS = (
     "bb_width_20", "bb_pos_20",
     "dist_sma_20", "dist_sma_50", "dist_sma_200",
     "dist_high_20d", "consecutive_up_days", "gap_pct"
-)
+))
