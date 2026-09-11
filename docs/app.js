@@ -1,9 +1,19 @@
+const REPO_OWNER = "vishnuvcr";
+const REPO_NAME = "market-gainer-predictor-specificity-precision-prioritised";
+const WORKFLOW_ID = "daily_scanner.yml";
+
 let latestData = null;
 let historyData = [];
+let monitorInterval = null;
+let currentActiveRunId = null;
+let runStartTime = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   setupTabs();
+  initTokenInput();
   await loadData();
+  checkActiveWorkflow();
+  setInterval(checkActiveWorkflow, 6000);
 });
 
 function setupTabs() {
@@ -19,19 +29,31 @@ function setupTabs() {
   });
 }
 
+function initTokenInput() {
+  const saved = localStorage.getItem("gh_pat_token");
+  if (saved) {
+    const input = document.getElementById("gh-token-input");
+    if (input) input.value = saved;
+  }
+}
+
 async function loadData() {
   try {
-    const resLatest = await fetch("data/latest.json");
-    latestData = await resLatest.json();
-    renderLive(latestData);
+    const resLatest = await fetch("data/latest.json?t=" + Date.now());
+    if (resLatest.ok) {
+      latestData = await resLatest.json();
+      renderLive(latestData);
+    }
   } catch (err) {
     console.warn("Could not fetch latest.json:", err);
   }
 
   try {
-    const resHist = await fetch("data/history.json");
-    historyData = await resHist.json();
-    populateHistorySelector(historyData);
+    const resHist = await fetch("data/history.json?t=" + Date.now());
+    if (resHist.ok) {
+      historyData = await resHist.json();
+      populateHistorySelector(historyData);
+    }
   } catch (err) {
     console.warn("Could not fetch history.json:", err);
   }
@@ -164,4 +186,284 @@ function copyPineScript() {
     btn.textContent = "Copied to Clipboard!";
     setTimeout(() => { btn.textContent = "Copy Pine v6 Script"; }, 2000);
   });
+}
+
+// ==============================================================================
+// EXPORT FUNCTIONS (CSV, JPG, PDF)
+// ==============================================================================
+function exportToCSV() {
+  if (!latestData || !latestData.candidates || latestData.candidates.length === 0) {
+    alert("No scan data available to export.");
+    return;
+  }
+
+  const headers = [
+    "Symbol", "Conviction", "Surge_Probability_Pct", "Current_Price_INR",
+    "Stop_Loss_INR", "Stop_Loss_Pct", "Target_1_INR", "Target_2_INR",
+    "Target_3_INR", "Risk_Reward_Ratio", "Volume_Surge_x", "RSI_14", "Catalysts", "Date"
+  ];
+
+  const rows = latestData.candidates.map(c => [
+    c.symbol,
+    `"${c.conviction}"`,
+    (c.probability * 100).toFixed(1),
+    c.close.toFixed(2),
+    c.stop_loss.toFixed(2),
+    c.stop_loss_pct,
+    c.target_1.toFixed(2),
+    c.target_2.toFixed(2),
+    c.target_3.toFixed(2),
+    c.risk_reward.toFixed(2),
+    c.volume_surge.toFixed(2),
+    c.rsi_14,
+    `"${(c.catalysts || []).join('; ')}"`,
+    c.date
+  ]);
+
+  const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `NSE_Surge_Trades_${latestData.date || 'latest'}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+async function exportToImage() {
+  const captureEl = document.getElementById("capture-table-area");
+  if (!captureEl) return;
+  const btn = document.getElementById("btn-export-jpg");
+  const orig = btn.textContent;
+  btn.textContent = "Generating...";
+  btn.disabled = true;
+
+  try {
+    if (typeof html2canvas === "undefined") {
+      throw new Error("html2canvas library is loading, please try again in a moment.");
+    }
+    const canvas = await html2canvas(captureEl, {
+      backgroundColor: "#0b0f19",
+      scale: 2,
+      useCORS: true
+    });
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const link = document.createElement("a");
+    link.href = imgData;
+    link.download = `NSE_Surge_Trades_${latestData ? latestData.date : 'latest'}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    console.error("Image export failed:", err);
+    alert("Could not generate JPG image: " + err.message);
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
+}
+
+async function exportToPDF() {
+  const captureEl = document.getElementById("capture-table-area");
+  if (!captureEl) return;
+  const btn = document.getElementById("btn-export-pdf");
+  const orig = btn.textContent;
+  btn.textContent = "Generating...";
+  btn.disabled = true;
+
+  try {
+    if (typeof html2canvas === "undefined" || !window.jspdf) {
+      throw new Error("PDF export libraries loading, please try again in a moment.");
+    }
+    const canvas = await html2canvas(captureEl, {
+      backgroundColor: "#0b0f19",
+      scale: 2,
+      useCORS: true
+    });
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "px",
+      format: [canvas.width, canvas.height]
+    });
+    pdf.addImage(imgData, "JPEG", 0, 0, canvas.width, canvas.height);
+    pdf.save(`NSE_Surge_Trades_${latestData ? latestData.date : 'latest'}.pdf`);
+  } catch (err) {
+    console.error("PDF export failed:", err);
+    alert("Could not generate PDF: " + err.message);
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
+}
+
+// ==============================================================================
+// GITHUB ACTIONS LIVE TRIGGER & PROGRESS MONITOR
+// ==============================================================================
+function openRunModal() {
+  document.getElementById("modal-error-msg").style.display = "none";
+  document.getElementById("run-modal").style.display = "flex";
+}
+
+function closeRunModal() {
+  document.getElementById("run-modal").style.display = "none";
+}
+
+async function triggerWorkflow() {
+  const token = document.getElementById("gh-token-input").value.trim();
+  const limitInput = document.getElementById("limit-tickers-input").value.trim();
+  const errorDiv = document.getElementById("modal-error-msg");
+  const btn = document.getElementById("btn-trigger-action");
+
+  if (!token) {
+    errorDiv.textContent = "Please enter your GitHub Personal Access Token.";
+    errorDiv.style.display = "block";
+    return;
+  }
+
+  localStorage.setItem("gh_pat_token", token);
+  btn.disabled = true;
+  btn.textContent = "Launching Scanner...";
+  errorDiv.style.display = "none";
+
+  const payload = { ref: "main", inputs: {} };
+  if (limitInput) payload.inputs.limit_tickers = limitInput;
+
+  try {
+    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/${WORKFLOW_ID}/dispatches`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Accept": "application/vnd.github+json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.status === 204) {
+      closeRunModal();
+      runStartTime = Date.now();
+      showBanner("Workflow Dispatched", "QUEUED", 10);
+      setTimeout(checkActiveWorkflow, 2500);
+    } else {
+      const errJson = await res.json().catch(() => ({}));
+      errorDiv.textContent = errJson.message || `Error ${res.status}: Check token permissions.`;
+      errorDiv.style.display = "block";
+    }
+  } catch (err) {
+    errorDiv.textContent = "Network error: " + err.message;
+    errorDiv.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "▶ Launch Scanner Now";
+  }
+}
+
+async function checkActiveWorkflow() {
+  const token = localStorage.getItem("gh_pat_token");
+  const headers = { "Accept": "application/vnd.github+json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  try {
+    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs?per_page=1`;
+    const res = await fetch(url, { headers });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.workflow_runs || data.workflow_runs.length === 0) return;
+
+    const run = data.workflow_runs[0];
+    const isRunning = run.status === "in_progress" || run.status === "queued";
+
+    if (isRunning) {
+      currentActiveRunId = run.id;
+      if (!runStartTime) runStartTime = new Date(run.run_started_at || run.created_at).getTime();
+
+      document.getElementById("live-run-banner").style.display = "block";
+      document.getElementById("live-run-title").textContent = `Workflow #${run.run_number}: Live Scanner`;
+      document.getElementById("live-run-badge").textContent = run.status.toUpperCase();
+      document.getElementById("live-run-link").href = run.html_url;
+
+      const elapsedSec = Math.floor((Date.now() - runStartTime) / 1000);
+      const min = Math.floor(elapsedSec / 60);
+      const sec = elapsedSec % 60;
+      document.getElementById("live-run-timer").textContent = `Active: ${min}m ${sec}s`;
+
+      if (!monitorInterval) {
+        monitorInterval = setInterval(fetchRunJobs, 3000);
+      }
+      fetchRunJobs();
+    } else {
+      if (currentActiveRunId && currentActiveRunId === run.id && run.conclusion === "success") {
+        document.getElementById("live-run-badge").textContent = "SUCCESS";
+        document.getElementById("live-progress-fill").style.width = "100%";
+        setTimeout(() => {
+          document.getElementById("live-run-banner").style.display = "none";
+          runStartTime = null;
+          loadData();
+        }, 3500);
+      }
+      if (monitorInterval) {
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not check workflow status:", err);
+  }
+}
+
+async function fetchRunJobs() {
+  if (!currentActiveRunId) return;
+  const token = localStorage.getItem("gh_pat_token");
+  const headers = { "Accept": "application/vnd.github+json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  try {
+    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${currentActiveRunId}/jobs`;
+    const res = await fetch(url, { headers });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.jobs || data.jobs.length === 0) return;
+
+    renderStepsList(data.jobs[0].steps || []);
+  } catch (err) {
+    console.warn("Could not fetch jobs:", err);
+  }
+}
+
+function renderStepsList(steps) {
+  const container = document.getElementById("live-steps-list");
+  if (!container) return;
+  container.innerHTML = "";
+
+  let completedCount = 0;
+  steps.forEach(s => {
+    if (s.status === "completed") completedCount++;
+    const div = document.createElement("div");
+    div.className = "live-step-item";
+
+    let icon = "○";
+    let statusClass = "step-pending";
+    if (s.status === "completed") {
+      icon = s.conclusion === "success" ? "✓" : "✗";
+      statusClass = s.conclusion === "success" ? "step-done" : "step-fail";
+    } else if (s.status === "in_progress") {
+      icon = "⟳";
+      statusClass = "step-active";
+    }
+
+    div.innerHTML = `<span class="${statusClass}">${icon}</span> <span>${s.name}</span>`;
+    container.appendChild(div);
+  });
+
+  const pct = Math.min(100, Math.round((completedCount / Math.max(1, steps.length)) * 100));
+  document.getElementById("live-progress-fill").style.width = pct + "%";
+}
+
+function showBanner(title, badge, pct) {
+  document.getElementById("live-run-banner").style.display = "block";
+  document.getElementById("live-run-title").textContent = title;
+  document.getElementById("live-run-badge").textContent = badge;
+  document.getElementById("live-progress-fill").style.width = pct + "%";
 }
