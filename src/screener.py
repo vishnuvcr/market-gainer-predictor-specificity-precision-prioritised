@@ -12,7 +12,7 @@ def generate_tomorrow_picks(ensemble: ModelEnsemble, latest_df: pd.DataFrame, to
     if latest_df.empty:
         return []
         
-    X_live = latest_df[FEATURE_COLUMNS].values
+    X_live = latest_df[list(FEATURE_COLUMNS)].values
     probs = ensemble.predict_proba(X_live)
     candidates = []
     
