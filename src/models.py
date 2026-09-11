@@ -1,12 +1,12 @@
 """
-Model definitions and hyperparameter search distributions.
+Optimized model definitions for fast multi-thousand ticker universes.
 """
 from typing import Dict, Any
 
 def get_base_models(random_state: int = 42) -> Dict[str, Any]:
     models = {}
     
-    # 1. LightGBM
+    # 1. LightGBM (Lightning fast, native NaN handling)
     try:
         import lightgbm as lgb
         models["LightGBM"] = lgb.LGBMClassifier(
@@ -20,7 +20,7 @@ def get_base_models(random_state: int = 42) -> Dict[str, Any]:
     except ImportError:
         pass
 
-    # 2. XGBoost
+    # 2. XGBoost (Fast histogram tree method, native NaN handling)
     try:
         import xgboost as xgb
         models["XGBoost"] = xgb.XGBClassifier(
@@ -34,27 +34,16 @@ def get_base_models(random_state: int = 42) -> Dict[str, Any]:
     except ImportError:
         pass
 
-    # 3. Random Forest
+    # 3. Random Forest (with 40% subsampling for 3x speedup)
     try:
         from sklearn.ensemble import RandomForestClassifier
         models["RandomForest"] = RandomForestClassifier(
             random_state=random_state,
-            n_estimators=60,
-            max_depth=10,
+            n_estimators=50,
+            max_depth=8,
+            max_samples=0.4,
             class_weight="balanced_subsample",
             n_jobs=-1
-        )
-    except ImportError:
-        pass
-
-    # 4. Gradient Boosting fallback
-    try:
-        from sklearn.ensemble import GradientBoostingClassifier
-        models["GradientBoosting"] = GradientBoostingClassifier(
-            random_state=random_state,
-            n_estimators=60,
-            learning_rate=0.05,
-            max_depth=4
         )
     except ImportError:
         pass
@@ -62,36 +51,20 @@ def get_base_models(random_state: int = 42) -> Dict[str, Any]:
     return models
 
 def get_hyperparameter_distributions() -> Dict[str, Dict[str, Any]]:
-    param_grids = {}
-    
-    param_grids["LightGBM"] = {
-        "n_estimators": (60, 100, 150),
-        "learning_rate": (0.03, 0.05, 0.08),
-        "num_leaves": (15, 31, 63),
-        "max_depth": (4, 6, 8),
-        "subsample": (0.8, 1.0),
-        "colsample_bytree": (0.8, 1.0)
+    return {
+        "LightGBM": {
+            "n_estimators": (60, 100),
+            "learning_rate": (0.03, 0.06),
+            "num_leaves": (15, 31),
+            "max_depth": (4, 6)
+        },
+        "XGBoost": {
+            "n_estimators": (60, 100),
+            "learning_rate": (0.03, 0.06),
+            "max_depth": (3, 5)
+        },
+        "RandomForest": {
+            "n_estimators": (40, 60),
+            "max_depth": (6, 10)
+        }
     }
-    
-    param_grids["XGBoost"] = {
-        "n_estimators": (60, 100, 150),
-        "learning_rate": (0.03, 0.05, 0.08),
-        "max_depth": (3, 5, 7),
-        "subsample": (0.8, 1.0),
-        "colsample_bytree": (0.8, 1.0)
-    }
-    
-    param_grids["RandomForest"] = {
-        "n_estimators": (50, 80),
-        "max_depth": (6, 10, 14),
-        "min_samples_split": (5, 10),
-        "max_features": ("sqrt", 0.8)
-    }
-    
-    param_grids["GradientBoosting"] = {
-        "n_estimators": (50, 80),
-        "learning_rate": (0.03, 0.06),
-        "max_depth": (3, 4, 6)
-    }
-    
-    return param_grids
