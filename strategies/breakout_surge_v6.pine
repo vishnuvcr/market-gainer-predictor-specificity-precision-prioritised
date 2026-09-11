@@ -1,0 +1,166 @@
+//@version=6
+strategy("NSE Breakout Surge ML Ensemble [v6]", 
+         overlay=true, 
+         initial_capital=100000, 
+         default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=15, 
+         commission_type=strategy.commission.percent, 
+         commission_value=0.03, 
+         slippage=1, 
+         process_orders_on_close=true)
+
+// ==============================================================================
+// 1. INPUT PARAMETERS & USER SETTINGS
+// ==============================================================================
+var string G_ML      = "ML Ensemble Parameters"
+var string G_RISK    = "Risk Management (Target & Stop Loss)"
+var string G_FILTERS = "Trend & Market Regime Filters"
+var string G_UI      = "Chart Visuals & Dashboard"
+
+// Calibrated High-Specificity ML Threshold (0-100)
+threshold_score   = input.float(72.0, "ML Conviction Score Threshold (0-100)", minval=50.0, maxval=95.0, step=1.0, group=G_ML)
+min_vol_surge     = input.float(1.5, "Min Volume Surge Multiplier", minval=1.0, maxval=10.0, step=0.1, group=G_ML)
+lookback_breakout = input.int(20, "Breakout Lookback (Bars)", minval=5, maxval=100, group=G_ML)
+
+// Risk & Exits
+target_1_pct      = input.float(5.0, "Profit Target 1 (%)", minval=1.0, maxval=20.0, step=0.5, group=G_RISK)
+target_2_pct      = input.float(10.0, "Profit Target 2 (%)", minval=2.0, maxval=40.0, step=1.0, group=G_RISK)
+target_3_pct      = input.float(18.0, "Profit Target 3 / Upper Circuit (%)", minval=5.0, maxval=50.0, step=1.0, group=G_RISK)
+atr_len           = input.int(14, "ATR Length", minval=1, group=G_RISK)
+atr_sl_mult       = input.float(1.5, "ATR Stop Loss Multiplier", minval=0.5, maxval=5.0, step=0.1, group=G_RISK)
+max_sl_cap_pct    = input.float(4.0, "Maximum Stop Loss Cap (%)", minval=1.0, maxval=10.0, step=0.5, group=G_RISK)
+enable_trailing   = input.bool(true, "Move Stop to Breakeven at Target 1", group=G_RISK)
+
+// Trend Filters
+use_trend_filter  = input.bool(true, "Require Price Above 50 SMA", group=G_FILTERS)
+min_rsi           = input.float(50.0, "Min RSI (14) Entry", minval=30.0, maxval=80.0, group=G_FILTERS)
+max_rsi           = input.float(78.0, "Max RSI (14) (Avoid Exhaustion)", minval=60.0, maxval=95.0, group=G_FILTERS)
+show_dashboard    = input.bool(true, "Show Strategy Table Dashboard", group=G_UI)
+
+// ==============================================================================
+// 2. QUANTITATIVE FEATURE CALCULATION
+// ==============================================================================
+sma20 = ta.sma(close, 20)
+sma50 = ta.sma(close, 50)
+sma200 = ta.sma(close, 200)
+
+vol_sma20 = ta.sma(volume, 20)
+vol_surge = vol_sma20 > 0 ? (volume / vol_sma20) : 1.0
+
+rsi14 = ta.rsi(close, 14)
+rsi7  = ta.rsi(close, 7)
+
+atr_val = ta.atr(atr_len)
+candle_range = high - low
+candle_body  = math.abs(close - open)
+body_ratio   = candle_range > 0 ? (candle_body / candle_range) : 0.0
+is_bullish_close = close > open and ((close - low) / (candle_range > 0 ? candle_range : 1.0)) > 0.60
+
+[bb_mid, bb_upper, bb_lower] = ta.bb(close, 20, 2.0)
+bb_width = bb_mid > 0 ? ((bb_upper - bb_lower) / bb_mid) : 0.0
+
+highest_high_lookback = ta.highest(high, lookback_breakout)
+near_resistance = close >= (highest_high_lookback * 0.985)
+
+// ==============================================================================
+// 3. COMPOSITE ML PROBABILITY SCORE SYNTHESIS (0 - 100)
+// ==============================================================================
+float score = 0.0
+
+// Component 1: Volume Explosion (Max 25 pts)
+if vol_surge >= min_vol_surge * 1.5
+    score += 25.0
+else if vol_surge >= min_vol_surge
+    score += 18.0
+else if vol_surge >= 1.2
+    score += 10.0
+
+// Component 2: Momentum & RSI Sweet Spot (Max 20 pts)
+if rsi14 >= min_rsi and rsi14 <= max_rsi
+    score += 15.0
+    if rsi7 > rsi14
+        score += 5.0
+
+// Component 3: Trend & MA Alignment (Max 20 pts)
+if close > sma20 and sma20 > sma50
+    score += 15.0
+    if close > sma200 or na(sma200)
+        score += 5.0
+
+// Component 4: Breakout Structure & Resistance (Max 20 pts)
+if close > highest_high_lookback
+    score += 20.0
+else if near_resistance
+    score += 12.0
+
+// Component 5: Candle Quality & Volatility Compression (Max 15 pts)
+if is_bullish_close and body_ratio > 0.55
+    score += 10.0
+if bb_width < 0.12
+    score += 5.0
+
+// ==============================================================================
+// 4. STRATEGY ENTRY & RISK-MANAGED EXITS
+// ==============================================================================
+trend_ok = not use_trend_filter or (close > sma50)
+entry_condition = (score >= threshold_score) and (vol_surge >= min_vol_surge) and trend_ok and (strategy.position_size == 0)
+
+var float entry_price = na
+var float stop_price  = na
+var float tp1_price   = na
+var float tp2_price   = na
+var float tp3_price   = na
+
+if entry_condition
+    entry_price := close
+    float raw_sl_dist = atr_val * atr_sl_mult
+    float max_sl_dist = close * (max_sl_cap_pct / 100.0)
+    float sl_dist = math.min(raw_sl_dist, max_sl_dist)
+    stop_price  := close - sl_dist
+    tp1_price   := close * (1.0 + target_1_pct / 100.0)
+    tp2_price   := close * (1.0 + target_2_pct / 100.0)
+    tp3_price   := close * (1.0 + target_3_pct / 100.0)
+    strategy.entry("ML_Surge_Long", strategy.long, comment="ML Long @" + str.tostring(close, "#.##"))
+
+if strategy.position_size > 0
+    if enable_trailing and high >= tp1_price and stop_price < entry_price
+        stop_price := entry_price // Lock in Breakeven
+
+    // Scale out: 50% at Target 1 (+5%), remainder at Target 2 (+10%) or Stop Loss
+    strategy.exit("TP1_Exit", from_entry="ML_Surge_Long", qty_percent=50, limit=tp1_price, stop=stop_price, comment="TP1 Hit (+5%)")
+    strategy.exit("TP2_Runner", from_entry="ML_Surge_Long", limit=tp2_price, stop=stop_price, comment="TP2/SL Exit")
+
+// ==============================================================================
+// 5. CHART VISUALIZATION & HIGHLIGHTS
+// ==============================================================================
+plot(sma20, "SMA 20", color=color.new(color.blue, 20), linewidth=2)
+plot(sma50, "SMA 50", color=color.new(color.orange, 20), linewidth=2)
+plot(highest_high_lookback, "20D Breakout Level", color=color.new(color.purple, 40), style=plot.style_stepline)
+
+plotshape(entry_condition, title="Surge Breakout Signal", style=shape.triangleup, location=location.belowbar, color=color.green, size=size.normal, text="ML SURGE")
+
+plot(strategy.position_size > 0 ? tp1_price : na, "Target 1 (+5%)", color=color.green, style=plot.style_linebr, linewidth=2)
+plot(strategy.position_size > 0 ? tp2_price : na, "Target 2 (+10%)", color=color.teal, style=plot.style_linebr, linewidth=2)
+plot(strategy.position_size > 0 ? stop_price : na, "Stop Loss", color=color.red, style=plot.style_linebr, linewidth=2)
+
+// ==============================================================================
+// 6. ON-CHART METRICS DASHBOARD TABLE
+// ==============================================================================
+var table dash = table.new(position.top_right, 2, 7, bgcolor=color.new(color.black, 20), border_width=1, border_color=color.gray)
+if barstate.islast and show_dashboard
+    color score_color = score >= threshold_score ? color.green : score >= (threshold_score * 0.8) ? color.orange : color.red
+    table.cell(dash, 0, 0, "Metric", bgcolor=color.new(color.navy, 10), text_color=color.white, text_size=size.small)
+    table.cell(dash, 1, 0, "Value", bgcolor=color.new(color.navy, 10), text_color=color.white, text_size=size.small)
+    table.cell(dash, 0, 1, "ML Surge Score", text_color=color.white, text_size=size.small)
+    table.cell(dash, 1, 1, str.tostring(score, "#.#") + " / 100", bgcolor=score_color, text_color=color.white, text_size=size.small)
+    table.cell(dash, 0, 2, "Volume Surge", text_color=color.white, text_size=size.small)
+    table.cell(dash, 1, 2, str.tostring(vol_surge, "#.##") + "x", text_color=color.white, text_size=size.small)
+    table.cell(dash, 0, 3, "RSI (14)", text_color=color.white, text_size=size.small)
+    table.cell(dash, 1, 3, str.tostring(rsi14, "#.#"), text_color=color.white, text_size=size.small)
+    table.cell(dash, 0, 4, "T1 (+5%)", text_color=color.white, text_size=size.small)
+    table.cell(dash, 1, 4, "₹" + str.tostring(close * (1 + target_1_pct/100), "#.##"), text_color=color.green, text_size=size.small)
+    table.cell(dash, 0, 5, "T2 (+10%)", text_color=color.white, text_size=size.small)
+    table.cell(dash, 1, 5, "₹" + str.tostring(close * (1 + target_2_pct/100), "#.##"), text_color=color.teal, text_size=size.small)
+    table.cell(dash, 0, 6, "Est. Stop Loss", text_color=color.white, text_size=size.small)
+    float est_sl = close - math.min(atr_val * atr_sl_mult, close * (max_sl_cap_pct / 100.0))
+    table.cell(dash, 1, 6, "₹" + str.tostring(est_sl, "#.##"), text_color=color.red, text_size=size.small)
