@@ -1,0 +1,596 @@
+{
+  "timestamp": "2026-09-11 18:14:23",
+  "date": "2026-09-11",
+  "total_tickers_scanned": 19,
+  "total_candidates": 19,
+  "high_conviction_count": 0,
+  "ensemble_metrics": {
+    "ensemble_auc": 0.6784395198522623,
+    "ensemble_pr_auc": 0.1454288753884133,
+    "threshold": 0.48,
+    "specificity": 0.9958448753462604,
+    "precision": 0.4,
+    "sensitivity": 0.03333333333333333,
+    "test_samples": 782,
+    "fp": 3,
+    "tp": 2
+  },
+  "models_summary": {
+    "LightGBM": {
+      "cv_auc": 0.6274700462151002,
+      "test_auc": 0.6743998153277931,
+      "test_pr_auc": 0.1514398362800153,
+      "brier_score": 0.1532351287181545,
+      "opt_threshold": 0.8099999999999999,
+      "specificity": 1.0,
+      "sensitivity": 0.016666666666666666,
+      "precision": 1.0,
+      "tp": 1,
+      "fp": 0,
+      "best_params": {
+        "subsample": 1.0,
+        "num_leaves": 31,
+        "n_estimators": 100,
+        "max_depth": 4,
+        "learning_rate": 0.03,
+        "colsample_bytree": 0.8
+      }
+    },
+    "XGBoost": {
+      "cv_auc": 0.6366901558222245,
+      "test_auc": 0.6975530932594645,
+      "test_pr_auc": 0.15511316682018286,
+      "brier_score": 0.06880335509777069,
+      "opt_threshold": 0.37,
+      "specificity": 0.9958448753462604,
+      "sensitivity": 0.03333333333333333,
+      "precision": 0.4,
+      "tp": 2,
+      "fp": 3,
+      "best_params": {
+        "subsample": 0.8,
+        "n_estimators": 150,
+        "max_depth": 3,
+        "learning_rate": 0.03,
+        "colsample_bytree": 0.8
+      }
+    },
+    "RandomForest": {
+      "cv_auc": 0.6241016974596502,
+      "test_auc": 0.6259926131117266,
+      "test_pr_auc": 0.1188645085663092,
+      "brier_score": 0.08667386141103677,
+      "opt_threshold": 0.4,
+      "specificity": 0.9778393351800554,
+      "sensitivity": 0.08333333333333333,
+      "precision": 0.23809523809523808,
+      "tp": 5,
+      "fp": 16,
+      "best_params": {
+        "n_estimators": 80,
+        "min_samples_split": 5,
+        "max_features": "sqrt",
+        "max_depth": 10
+      }
+    },
+    "GradientBoosting": {
+      "cv_auc": 0.6634497815481015,
+      "test_auc": 0.692566943674977,
+      "test_pr_auc": 0.15110414876324127,
+      "brier_score": 0.07044601227327767,
+      "opt_threshold": 0.26,
+      "specificity": 0.9722991689750693,
+      "sensitivity": 0.15,
+      "precision": 0.3103448275862069,
+      "tp": 9,
+      "fp": 20,
+      "best_params": {
+        "n_estimators": 50,
+        "max_depth": 4,
+        "learning_rate": 0.06
+      }
+    }
+  },
+  "top_features": [
+    {
+      "feature": "atr_pct_14",
+      "importance": 0.11335359123691247
+    },
+    {
+      "feature": "candle_range_pct",
+      "importance": 0.07383426517325752
+    },
+    {
+      "feature": "vol_surge_5",
+      "importance": 0.05177441513863632
+    },
+    {
+      "feature": "bb_width_20",
+      "importance": 0.04914480762264275
+    },
+    {
+      "feature": "body_to_range",
+      "importance": 0.0478380725226985
+    },
+    {
+      "feature": "return_3d",
+      "importance": 0.042955126952767486
+    },
+    {
+      "feature": "dist_high_20d",
+      "importance": 0.041326707589694256
+    },
+    {
+      "feature": "vol_surge_20",
+      "importance": 0.0395646637769467
+    },
+    {
+      "feature": "turnover_surge",
+      "importance": 0.03853715070074201
+    },
+    {
+      "feature": "return_5d",
+      "importance": 0.037479755511455264
+    }
+  ],
+  "candidates": [
+    {
+      "ticker": "63MOONS.NS",
+      "symbol": "63MOONS",
+      "close": 908.9000244140625,
+      "probability": 0.4351836653402695,
+      "conviction": "MODERATE CONVICTION",
+      "badge_class": "badge-med",
+      "entry_ref": 908.9000244140625,
+      "stop_loss": 872.54,
+      "stop_loss_pct": -4.0,
+      "target_1": 954.35,
+      "target_1_pct": 5.0,
+      "target_2": 999.79,
+      "target_2_pct": 10.0,
+      "target_3": 1072.5,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 3.06,
+      "rsi_14": 68.1,
+      "catalysts": [
+        "Volume Breakout (3.1x 20D SMA)",
+        "Bullish RSI (68.1)"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "AARON.NS",
+      "symbol": "AARON",
+      "close": 126.94000244140625,
+      "probability": 0.4093725218000011,
+      "conviction": "MODERATE CONVICTION",
+      "badge_class": "badge-med",
+      "entry_ref": 126.94000244140625,
+      "stop_loss": 121.86,
+      "stop_loss_pct": -4.0,
+      "target_1": 133.29,
+      "target_1_pct": 5.0,
+      "target_2": 139.63,
+      "target_2_pct": 10.0,
+      "target_3": 149.79,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 2.29,
+      "rsi_14": 44.2,
+      "catalysts": [
+        "Volume Breakout (2.3x 20D SMA)"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "AAKASH.NS",
+      "symbol": "AAKASH",
+      "close": 9.100000381469727,
+      "probability": 0.30654623059609887,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 9.100000381469727,
+      "stop_loss": 8.74,
+      "stop_loss_pct": -3.96,
+      "target_1": 9.56,
+      "target_1_pct": 5.0,
+      "target_2": 10.01,
+      "target_2_pct": 10.0,
+      "target_3": 10.74,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.26,
+      "volume_surge": 0.83,
+      "rsi_14": 58.4,
+      "catalysts": [
+        "Bullish RSI (58.4)"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "AARTECH.NS",
+      "symbol": "AARTECH",
+      "close": 51.9900016784668,
+      "probability": 0.23140923700428864,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 51.9900016784668,
+      "stop_loss": 49.91,
+      "stop_loss_pct": -4.0,
+      "target_1": 54.59,
+      "target_1_pct": 5.0,
+      "target_2": 57.19,
+      "target_2_pct": 10.0,
+      "target_3": 61.35,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 0.23,
+      "rsi_14": 59.5,
+      "catalysts": [
+        "Bullish RSI (59.5)"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "3IINFOLTD.NS",
+      "symbol": "3IINFOLTD",
+      "close": 22.850000381469727,
+      "probability": 0.21039988249140906,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 22.850000381469727,
+      "stop_loss": 21.94,
+      "stop_loss_pct": -3.98,
+      "target_1": 23.99,
+      "target_1_pct": 5.0,
+      "target_2": 25.14,
+      "target_2_pct": 10.0,
+      "target_3": 26.96,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.26,
+      "volume_surge": 1.46,
+      "rsi_14": 48.9,
+      "catalysts": [
+        "Multi-factor Momentum Alignment"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "AAREYDRUGS.NS",
+      "symbol": "AAREYDRUGS",
+      "close": 98.88999938964844,
+      "probability": 0.21026652101079943,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 98.88999938964844,
+      "stop_loss": 94.93,
+      "stop_loss_pct": -4.0,
+      "target_1": 103.83,
+      "target_1_pct": 5.0,
+      "target_2": 108.78,
+      "target_2_pct": 10.0,
+      "target_3": 116.69,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 1.58,
+      "rsi_14": 67.2,
+      "catalysts": [
+        "Bullish RSI (67.2)"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "AARNAV.NS",
+      "symbol": "AARNAV",
+      "close": 30.559999465942383,
+      "probability": 0.20667791415642972,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 30.559999465942383,
+      "stop_loss": 29.34,
+      "stop_loss_pct": -3.99,
+      "target_1": 32.09,
+      "target_1_pct": 5.0,
+      "target_2": 33.62,
+      "target_2_pct": 10.0,
+      "target_3": 36.06,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 0.38,
+      "rsi_14": 44.0,
+      "catalysts": [
+        "Multi-factor Momentum Alignment"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "3PLAND.NS",
+      "symbol": "3PLAND",
+      "close": 31.239999771118164,
+      "probability": 0.19565681308601313,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 31.239999771118164,
+      "stop_loss": 29.99,
+      "stop_loss_pct": -4.0,
+      "target_1": 32.8,
+      "target_1_pct": 5.0,
+      "target_2": 34.36,
+      "target_2_pct": 10.0,
+      "target_3": 36.86,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 4.82,
+      "rsi_14": 40.0,
+      "catalysts": [
+        "Volume Breakout (4.8x 20D SMA)",
+        "Bollinger Volatility Squeeze"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "AARTIDRUGS.NS",
+      "symbol": "AARTIDRUGS",
+      "close": 428.5,
+      "probability": 0.1716216378388289,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 428.5,
+      "stop_loss": 411.36,
+      "stop_loss_pct": -4.0,
+      "target_1": 449.93,
+      "target_1_pct": 5.0,
+      "target_2": 471.35,
+      "target_2_pct": 10.0,
+      "target_3": 505.63,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 1.11,
+      "rsi_14": 54.9,
+      "catalysts": [
+        "Bollinger Volatility Squeeze"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "AARTIPHARM.NS",
+      "symbol": "AARTIPHARM",
+      "close": 826.9500122070312,
+      "probability": 0.15786111115334078,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 826.9500122070312,
+      "stop_loss": 793.87,
+      "stop_loss_pct": -4.0,
+      "target_1": 868.3,
+      "target_1_pct": 5.0,
+      "target_2": 909.65,
+      "target_2_pct": 10.0,
+      "target_3": 975.8,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 0.64,
+      "rsi_14": 52.2,
+      "catalysts": [
+        "Multi-factor Momentum Alignment"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "20MICRONS.NS",
+      "symbol": "20MICRONS",
+      "close": 207.86000061035156,
+      "probability": 0.14563010746684468,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 207.86000061035156,
+      "stop_loss": 199.55,
+      "stop_loss_pct": -4.0,
+      "target_1": 218.25,
+      "target_1_pct": 5.0,
+      "target_2": 228.65,
+      "target_2_pct": 10.0,
+      "target_3": 245.27,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 0.72,
+      "rsi_14": 49.1,
+      "catalysts": [
+        "Multi-factor Momentum Alignment"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "A2ZINFRA.NS",
+      "symbol": "A2ZINFRA",
+      "close": 15.329999923706055,
+      "probability": 0.14027887595408137,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 15.329999923706055,
+      "stop_loss": 14.72,
+      "stop_loss_pct": -3.98,
+      "target_1": 16.1,
+      "target_1_pct": 5.0,
+      "target_2": 16.86,
+      "target_2_pct": 10.0,
+      "target_3": 18.09,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.26,
+      "volume_surge": 0.22,
+      "rsi_14": 48.1,
+      "catalysts": [
+        "Multi-factor Momentum Alignment"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "AARTIIND.NS",
+      "symbol": "AARTIIND",
+      "close": 492.70001220703125,
+      "probability": 0.12351256333756781,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 492.70001220703125,
+      "stop_loss": 472.99,
+      "stop_loss_pct": -4.0,
+      "target_1": 517.34,
+      "target_1_pct": 5.0,
+      "target_2": 541.97,
+      "target_2_pct": 10.0,
+      "target_3": 581.39,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 0.64,
+      "rsi_14": 41.6,
+      "catalysts": [
+        "Multi-factor Momentum Alignment"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "5PAISA.NS",
+      "symbol": "5PAISA",
+      "close": 326.54998779296875,
+      "probability": 0.11633717390783507,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 326.54998779296875,
+      "stop_loss": 313.49,
+      "stop_loss_pct": -4.0,
+      "target_1": 342.88,
+      "target_1_pct": 5.0,
+      "target_2": 359.2,
+      "target_2_pct": 10.0,
+      "target_3": 385.33,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 0.48,
+      "rsi_14": 31.3,
+      "catalysts": [
+        "Multi-factor Momentum Alignment"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "AAATECH.NS",
+      "symbol": "AAATECH",
+      "close": 91.87999725341797,
+      "probability": 0.09625916642198139,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 91.87999725341797,
+      "stop_loss": 88.2,
+      "stop_loss_pct": -4.01,
+      "target_1": 96.47,
+      "target_1_pct": 5.0,
+      "target_2": 101.07,
+      "target_2_pct": 10.0,
+      "target_3": 108.42,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 0.51,
+      "rsi_14": 46.7,
+      "catalysts": [
+        "Bollinger Volatility Squeeze"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "360ONE.NS",
+      "symbol": "360ONE",
+      "close": 1091.0,
+      "probability": 0.0959937621089609,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 1091.0,
+      "stop_loss": 1047.36,
+      "stop_loss_pct": -4.0,
+      "target_1": 1145.55,
+      "target_1_pct": 5.0,
+      "target_2": 1200.1,
+      "target_2_pct": 10.0,
+      "target_3": 1287.38,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 1.01,
+      "rsi_14": 34.7,
+      "catalysts": [
+        "Multi-factor Momentum Alignment"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "21STCENMGM.NS",
+      "symbol": "21STCENMGM",
+      "close": 38.38999938964844,
+      "probability": 0.09367500007700619,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 38.38999938964844,
+      "stop_loss": 36.85,
+      "stop_loss_pct": -4.01,
+      "target_1": 40.31,
+      "target_1_pct": 5.0,
+      "target_2": 42.23,
+      "target_2_pct": 10.0,
+      "target_3": 45.3,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 0.08,
+      "rsi_14": 38.5,
+      "catalysts": [
+        "Multi-factor Momentum Alignment"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "AADHARHFC.NS",
+      "symbol": "AADHARHFC",
+      "close": 456.79998779296875,
+      "probability": 0.06648059109687204,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 456.79998779296875,
+      "stop_loss": 438.53,
+      "stop_loss_pct": -4.0,
+      "target_1": 479.64,
+      "target_1_pct": 5.0,
+      "target_2": 502.48,
+      "target_2_pct": 10.0,
+      "target_3": 539.02,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.25,
+      "volume_surge": 0.59,
+      "rsi_14": 34.1,
+      "catalysts": [
+        "Bollinger Volatility Squeeze"
+      ],
+      "date": "2026-09-11"
+    },
+    {
+      "ticker": "3MINDIA.NS",
+      "symbol": "3MINDIA",
+      "close": 32710.0,
+      "probability": 0.037699600543694235,
+      "conviction": "WATCHLIST ONLY",
+      "badge_class": "badge-low",
+      "entry_ref": 32710.0,
+      "stop_loss": 31622.63,
+      "stop_loss_pct": -3.32,
+      "target_1": 34345.5,
+      "target_1_pct": 5.0,
+      "target_2": 35981.0,
+      "target_2_pct": 10.0,
+      "target_3": 38597.8,
+      "target_3_pct": 18.0,
+      "risk_reward": 1.5,
+      "volume_surge": 0.47,
+      "rsi_14": 35.3,
+      "catalysts": [
+        "Multi-factor Momentum Alignment"
+      ],
+      "date": "2026-09-11"
+    }
+  ]
+}
