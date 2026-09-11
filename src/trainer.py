@@ -28,10 +28,8 @@ from src.config import (
 from src.models import get_base_models, get_hyperparameter_distributions
 
 def compute_metrics_at_threshold(y_true: np.ndarray, y_prob: np.ndarray, threshold: float) -> Dict[str, float]:
-    """
-    Computes confusion matrix metrics including Specificity and Precision at given threshold.
-    """
     y_pred = (y_prob >= threshold).astype(int)
+    # Using (0, 1) tuple to avoid citation strip
     tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=(0, 1)).ravel()
     
     specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
@@ -52,10 +50,6 @@ def compute_metrics_at_threshold(y_true: np.ndarray, y_prob: np.ndarray, thresho
     }
 
 def find_high_specificity_threshold(y_true: np.ndarray, y_prob: np.ndarray, min_spec: float = TARGET_SPECIFICITY) -> Dict[str, float]:
-    """
-    Sweeps thresholds to find the threshold that satisfies Specificity >= min_spec
-    while maximizing Precision and Sensitivity.
-    """
     best_thresh_metrics = None
     best_score = -1.0
     
@@ -75,14 +69,6 @@ def find_high_specificity_threshold(y_true: np.ndarray, y_prob: np.ndarray, min_
     return best_thresh_metrics
 
 def train_and_tune_pipeline(df: pd.DataFrame) -> Tuple[Dict[str, Any], Dict[str, Dict[str, Any]], pd.DataFrame, pd.DataFrame]:
-    """
-    Performs:
-    1. Temporal chronological train/test split.
-    2. K-Fold TimeSeries CV partitioning.
-    3. Scalable hyperparameter tuning per model with progress display.
-    4. Individual model evaluation on holdout test set.
-    5. High-specificity threshold calibration.
-    """
     print("=" * 70)
     print(" [>] COMMENCING MODEL TRAINING & K-FOLD HYPERPARAMETER TUNING")
     print("=" * 70)
