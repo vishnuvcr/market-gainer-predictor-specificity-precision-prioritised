@@ -1,0 +1,111 @@
+from pathlib import Path
+from src.config import PINE_FILE
+
+def generate_pine_v6_script(feat_imp_df=None, opt_threshold: float = 0.70, output_path: Path = PINE_FILE) -> str:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    top_notes = ""
+    if feat_imp_df is not None and not feat_imp_df.empty:
+        top_notes = f"// Top ML Features Identified: {', '.join(feat_imp_df.head(3)['feature'].tolist())}\n"
+        
+    script = f'''//@version=6
+strategy("NSE Breakout Surge ML Ensemble [v6]", overlay=true, initial_capital=100000, default_qty_type=strategy.percent_of_equity, default_qty_value=15, commission_type=strategy.commission.percent, commission_value=0.03, slippage=1, process_orders_on_close=true)
+
+{top_notes}var string G_ML = "ML Ensemble Parameters"
+var string G_RISK = "Risk Management"
+var string G_FILTERS = "Trend Filters"
+var string G_UI = "Dashboard"
+
+threshold_score = input.float({round(opt_threshold * 100, 1)}, "ML Score Threshold (0-100)", minval=50.0, maxval=95.0, group=G_ML)
+min_vol_surge = input.float(1.5, "Min Volume Surge Multiplier", minval=1.0, maxval=10.0, group=G_ML)
+lookback_breakout = input.int(20, "Breakout Lookback (Bars)", minval=5, maxval=100, group=G_ML)
+
+target_1_pct = input.float(5.0, "Target 1 (%)", group=G_RISK)
+target_2_pct = input.float(10.0, "Target 2 (%)", group=G_RISK)
+target_3_pct = input.float(18.0, "Target 3 (%)", group=G_RISK)
+atr_len = input.int(14, "ATR Length", group=G_RISK)
+atr_sl_mult = input.float(1.5, "ATR SL Multiplier", group=G_RISK)
+max_sl_cap_pct = input.float(4.0, "Max SL Cap (%)", group=G_RISK)
+enable_trailing = input.bool(true, "Move SL to Breakeven at Target 1", group=G_RISK)
+
+use_trend_filter = input.bool(true, "Require Price > 50 SMA", group=G_FILTERS)
+min_rsi = input.float(50.0, "Min RSI", group=G_FILTERS)
+max_rsi = input.float(78.0, "Max RSI", group=G_FILTERS)
+show_dashboard = input.bool(true, "Show Dashboard Table", group=G_UI)
+
+sma20 = ta.sma(close, 20)
+sma50 = ta.sma(close, 50)
+sma200 = ta.sma(close, 200)
+
+vol_sma20 = ta.sma(volume, 20)
+vol_surge = vol_sma20 > 0 ? (volume / vol_sma20) : 1.0
+
+rsi14 = ta.rsi(close, 14)
+rsi7 = ta.rsi(close, 7)
+
+atr_val = ta.atr(atr_len)
+candle_range = high - low
+candle_body = math.abs(close - open)
+body_ratio = candle_range > 0 ? (candle_body / candle_range) : 0.0
+is_bullish_close = close > open and ((close - low) / (candle_range > 0 ? candle_range : 1.0)) > 0.60
+
+[bb_mid, bb_upper, bb_lower] = ta.bb(close, 20, 2.0)
+bb_width = bb_mid > 0 ? ((bb_upper - bb_lower) / bb_mid) : 0.0
+
+highest_high = ta.highest(high, lookback_breakout)
+near_resistance = close >= (highest_high * 0.985)
+
+float score = 0.0
+if vol_surge >= min_vol_surge * 1.5
+    score += 25.0
+else if vol_surge >= min_vol_surge
+    score += 18.0
+
+if rsi14 >= min_rsi and rsi14 <= max_rsi
+    score += 15.0
+    if rsi7 > rsi14
+        score += 5.0
+
+if close > sma20 and sma20 > sma50
+    score += 15.0
+    if close > sma200 or na(sma200)
+        score += 5.0
+
+if close > highest_high
+    score += 20.0
+else if near_resistance
+    score += 12.0
+
+if is_bullish_close and body_ratio > 0.55
+    score += 10.0
+if bb_width < 0.12
+    score += 5.0
+
+trend_ok = not use_trend_filter or (close > sma50)
+entry_condition = (score >= threshold_score) and (vol_surge >= min_vol_surge) and trend_ok and (strategy.position_size == 0)
+
+var float entry_price = na
+var float stop_price = na
+var float tp1_price = na
+var float tp2_price = na
+
+if entry_condition
+    entry_price := close
+    float sl_dist = math.min(atr_val * atr_sl_mult, close * (max_sl_cap_pct / 100.0))
+    stop_price := close - sl_dist
+    tp1_price := close * (1.0 + target_1_pct / 100.0)
+    tp2_price := close * (1.0 + target_2_pct / 100.0)
+    strategy.entry("ML_Surge_Long", strategy.long)
+
+if strategy.position_size > 0
+    if enable_trailing and high >= tp1_price and stop_price < entry_price
+        stop_price := entry_price
+    strategy.exit("TP1_Exit", from_entry="ML_Surge_Long", qty_percent=50, limit=tp1_price, stop=stop_price)
+    strategy.exit("TP2_Runner", from_entry="ML_Surge_Long", limit=tp2_price, stop=stop_price)
+
+plot(sma20, "SMA 20", color=color.new(color.blue, 20))
+plot(sma50, "SMA 50", color=color.new(color.orange, 20))
+plotshape(entry_condition, "ML Surge Signal", style=shape.triangleup, location=location.belowbar, color=color.green, size=size.normal)
+'''
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(script)
+    return script
