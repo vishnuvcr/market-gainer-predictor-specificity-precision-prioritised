@@ -148,7 +148,7 @@ def train_and_tune_pipeline(df: pd.DataFrame) -> Tuple[Dict[str, Any], Dict[str,
         # 1D positive class probability extraction
         if hasattr(best_model, "predict_proba"):
             raw_prob = best_model.predict_proba(X_test)
-            y_prob_test = raw_prob.T if raw_prob.ndim == 2 else raw_prob
+            y_prob_test = raw_prob.take(1, axis=1) if raw_prob.ndim == 2 else raw_prob
         else:
             y_prob_test = best_model.predict(X_test)
             
