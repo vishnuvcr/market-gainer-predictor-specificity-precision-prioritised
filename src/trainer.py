@@ -87,7 +87,6 @@ def train_and_tune_pipeline(df: pd.DataFrame) -> Tuple[Dict[str, Any], Dict[str,
     print(" [>] COMMENCING MODEL TRAINING & K-FOLD HYPERPARAMETER TUNING")
     print("=" * 70)
     
-    # 1. Temporal train/test split
     unique_dates = sorted(df.index.unique())
     split_idx = int(len(unique_dates) * (1 - TEST_SIZE_RATIO))
     train_dates = unique_dates[:split_idx]
@@ -107,11 +106,10 @@ def train_and_tune_pipeline(df: pd.DataFrame) -> Tuple[Dict[str, Any], Dict[str,
     print(f" [SPLIT] K-Fold CV   : {K_FOLDS} Time-Series Temporal Folds")
     print("-" * 70)
     
-    # Representative subsampling for fast hyperparameter search if dataset is massive
     if len(X_train) > MAX_TUNING_SAMPLES:
         rng = np.random.RandomState(RANDOM_STATE)
         sub_indices = rng.choice(len(X_train), size=MAX_TUNING_SAMPLES, replace=False)
-        sub_indices.sort()  # Preserve time ordering
+        sub_indices.sort()
         X_tune = X_train[sub_indices]
         y_tune = y_train[sub_indices]
         print(f" [SPEEDUP] Subsampled {MAX_TUNING_SAMPLES:,} rows for rapid hyperparameter optimization.")
@@ -152,7 +150,6 @@ def train_and_tune_pipeline(df: pd.DataFrame) -> Tuple[Dict[str, Any], Dict[str,
             best_params = search.best_params_
             cv_auc = search.best_score_
             
-            # Refit best estimator on full training dataset
             best_model = model.set_params(**best_params)
             best_model.fit(X_train, y_train)
             print(f"   -> Best CV ROC-AUC: {cv_auc:.4f} (tuned & fitted in {time.time() - start_t:.1f}s)")
@@ -163,7 +160,6 @@ def train_and_tune_pipeline(df: pd.DataFrame) -> Tuple[Dict[str, Any], Dict[str,
             
         fitted_models[model_name] = best_model
         
-        # Test evaluation
         if hasattr(best_model, "predict_proba"):
             y_prob_test = best_model.predict_proba(X_test)
         else:
@@ -175,7 +171,6 @@ def train_and_tune_pipeline(df: pd.DataFrame) -> Tuple[Dict[str, Any], Dict[str,
         test_pr_auc = average_precision_score(y_test, y_prob_test)
         brier = brier_score_loss(y_test, y_prob_test)
         
-        # High specificity threshold search
         spec_metrics = find_high_specificity_threshold(y_test, y_prob_test, min_spec=TARGET_SPECIFICITY)
         
         model_eval_results[model_name] = {
