@@ -23,7 +23,11 @@ class ModelEnsemble:
             w = self.weights.get(name, 0.0)
             if w <= 0:
                 continue
-            probs = model.predict_proba(X) if hasattr(model, "predict_proba") else model.predict(X)
+            if hasattr(model, "predict_proba"):
+                raw_prob = model.predict_proba(X)
+                probs = raw_prob.take(1, axis=1) if raw_prob.ndim == 2 else raw_prob
+            else:
+                probs = model.predict(X)
             total_prob += w * probs
         return total_prob / (total_weight + 1e-9)
 
