@@ -32,7 +32,7 @@ def compute_metrics_at_threshold(y_true: np.ndarray, y_prob: np.ndarray, thresho
     Computes confusion matrix metrics including Specificity and Precision at given threshold.
     """
     y_pred = (y_prob >= threshold).astype(int)
-    tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=).ravel()
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=(0, 1)).ravel()
     
     specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
     sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0.0
