@@ -29,8 +29,8 @@ TEST_SIZE_RATIO = 0.20       # Out-of-time test set ratio (last 20% of trading d
 TARGET_SPECIFICITY = 0.95    # High specificity target (>=95% to suppress false breakouts)
 
 # Scalability & Search Settings
-MAX_TUNING_SAMPLES = 120000  # Subsample cap for fast hyperparameter search
-HYPERPARAM_SEARCH_ITER = 8   # Search iterations per model
+MAX_TUNING_SAMPLES = 50000  # Subsample cap for fast hyperparameter search
+HYPERPARAM_SEARCH_ITER = 4   # Search iterations per model
 RANDOM_STATE = 42
 
 # Risk Management Settings
