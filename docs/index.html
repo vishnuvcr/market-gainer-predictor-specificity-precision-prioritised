@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NSE Stock Surge ML Scanner | High Specificity 5-20% Breakout Engine</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Client-Side JPG & PDF Export Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -13,7 +16,8 @@
         <h1>NSE Breakout Surge ML Scanner</h1>
         <p>Automated Machine Learning Pipeline Targeting Tomorrow's >5% to 20% Surges</p>
       </div>
-      <div class="header-meta">
+      <div class="header-actions">
+        <button class="btn-action btn-run" onclick="openRunModal()">▶ Run Scanner Directly</button>
         <span class="badge badge-high" id="stat-status">ACTIVE & RUNNING</span>
       </div>
     </header>
@@ -42,6 +46,27 @@
       </div>
     </div>
 
+    <!-- Live Execution Status Banner -->
+    <div id="live-run-banner" class="live-banner" style="display:none;">
+      <div class="live-banner-header">
+        <div class="live-title">
+          <span class="pulse-dot"></span>
+          <strong id="live-run-title">GitHub Actions Workflow Active</strong>
+          <span class="badge badge-high" id="live-run-badge">IN PROGRESS</span>
+        </div>
+        <div class="live-meta">
+          <span id="live-run-timer" style="color:var(--accent-amber); font-weight:600;">Active: 0s</span> | 
+          <a id="live-run-link" href="#" target="_blank" class="tv-link">View Raw Logs ↗</a>
+        </div>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="live-progress-fill" style="width: 15%;"></div>
+      </div>
+      <div class="live-steps-list" id="live-steps-list">
+        <!-- Live step cards injected here -->
+      </div>
+    </div>
+
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
       <button class="tab-btn active" data-tab="tab-picks">Tomorrow's Trades</button>
@@ -59,8 +84,16 @@
           <option value="HIGH">High Conviction Only (>=95% Specificity)</option>
           <option value="MODERATE">Moderate Conviction</option>
         </select>
+        
+        <!-- Export Button Group -->
+        <div class="export-group">
+          <button class="btn-export" id="btn-export-csv" onclick="exportToCSV()" title="Export results to CSV">📥 Export CSV</button>
+          <button class="btn-export" id="btn-export-jpg" onclick="exportToImage()" title="Save results as High-Res Image">🖼️ Export JPG</button>
+          <button class="btn-export" id="btn-export-pdf" onclick="exportToPDF()" title="Download printable PDF Report">📄 Export PDF</button>
+        </div>
       </div>
-      <div class="table-wrapper">
+
+      <div class="table-wrapper" id="capture-table-area">
         <table>
           <thead>
             <tr>
@@ -77,7 +110,7 @@
             </tr>
           </thead>
           <tbody id="live-picks-body">
-            <!-- Injected by app.js -->
+            <!-- Dynamically injected -->
           </tbody>
         </table>
       </div>
@@ -87,9 +120,7 @@
     <div id="tab-history" class="tab-content">
       <div class="controls-bar">
         <label for="history-date-select" style="color:var(--text-muted); font-size:14px;">Select Archived Date:</label>
-        <select id="history-date-select" onchange="onHistoryDateChange()">
-          <!-- Populated from history.json -->
-        </select>
+        <select id="history-date-select" onchange="onHistoryDateChange()"></select>
       </div>
       <div class="table-wrapper">
         <table>
@@ -107,9 +138,7 @@
               <th>Catalysts</th>
             </tr>
           </thead>
-          <tbody id="history-picks-body">
-            <!-- Injected from history -->
-          </tbody>
+          <tbody id="history-picks-body"></tbody>
         </table>
       </div>
     </div>
@@ -130,9 +159,7 @@
               <th>Opt. Threshold</th>
             </tr>
           </thead>
-          <tbody id="models-table-body">
-            <!-- Injected -->
-          </tbody>
+          <tbody id="models-table-body"></tbody>
         </table>
       </div>
 
@@ -146,9 +173,7 @@
               <th>Importance %</th>
             </tr>
           </thead>
-          <tbody id="features-table-body">
-            <!-- Injected -->
-          </tbody>
+          <tbody id="features-table-body"></tbody>
         </table>
       </div>
     </div>
@@ -216,6 +241,37 @@ plotshape(entry_condition, "ML Surge", style=shape.triangleup, location=location
       </div>
     </div>
 
+  </div>
+
+  <!-- Trigger Workflow Modal -->
+  <div id="run-modal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Run Daily Scanner Directly</h2>
+        <button class="modal-close" onclick="closeRunModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">
+          Trigger the GitHub Actions workflow directly from this dashboard and monitor progress in real-time.
+        </p>
+
+        <label class="input-label">GitHub Personal Access Token (PAT):</label>
+        <input type="password" id="gh-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="modal-input">
+        <small style="color:var(--text-muted); display:block; margin-top:4px; font-size:12px;">
+          Stored locally in your browser only. Needs <code>repo</code> or <code>actions:write</code> scope.
+          <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank" class="tv-link">Generate Token ↗</a>
+        </small>
+
+        <label class="input-label" style="margin-top:16px;">Ticker Limit (Optional):</label>
+        <input type="number" id="limit-tickers-input" placeholder="Leave blank for all 2,571 stocks, or e.g. 20 for fast test" class="modal-input">
+
+        <div id="modal-error-msg" style="color:var(--accent-red); margin-top:12px; display:none; font-size:13px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeRunModal()">Cancel</button>
+        <button class="btn-action btn-confirm" id="btn-trigger-action" onclick="triggerWorkflow()">▶ Launch Scanner Now</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
