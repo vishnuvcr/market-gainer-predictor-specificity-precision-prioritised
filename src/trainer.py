@@ -29,7 +29,6 @@ from src.models import get_base_models, get_hyperparameter_distributions
 
 def compute_metrics_at_threshold(y_true: np.ndarray, y_prob: np.ndarray, threshold: float) -> Dict[str, float]:
     y_pred = (y_prob >= threshold).astype(int)
-    # Using (0, 1) tuple to avoid citation strip
     tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=(0, 1)).ravel()
     
     specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
@@ -146,8 +145,10 @@ def train_and_tune_pipeline(df: pd.DataFrame) -> Tuple[Dict[str, Any], Dict[str,
             
         fitted_models[model_name] = best_model
         
+        # 1D positive class probability extraction
         if hasattr(best_model, "predict_proba"):
-            y_prob_test = best_model.predict_proba(X_test)
+            raw_prob = best_model.predict_proba(X_test)
+            y_prob_test = raw_prob.T if raw_prob.ndim == 2 else raw_prob
         else:
             y_prob_test = best_model.predict(X_test)
             
