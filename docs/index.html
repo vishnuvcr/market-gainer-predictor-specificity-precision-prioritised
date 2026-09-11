@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NSE Stock Surge ML Scanner | High Specificity 5-20% Breakout Engine</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-title">
+        <h1>NSE Breakout Surge ML Scanner</h1>
+        <p>Automated Machine Learning Pipeline Targeting Tomorrow's >5% to 20% Surges</p>
+      </div>
+      <div class="header-meta">
+        <span class="badge badge-high" id="stat-status">ACTIVE & RUNNING</span>
+      </div>
+    </header>
+
+    <!-- Stat Highlights -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Last Pipeline Execution</div>
+        <div class="value" id="stat-time" style="font-size:18px;">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Total Scanned Stocks</div>
+        <div class="value" id="stat-scanned">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">High Conviction Surges</div>
+        <div class="value" id="stat-conviction" style="color:var(--accent-green);">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Model Test ROC-AUC</div>
+        <div class="value" id="stat-auc" style="color:var(--accent-blue);">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Calibrated Specificity</div>
+        <div class="value" id="stat-spec" style="color:var(--accent-purple);">--</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" data-tab="tab-picks">Tomorrow's Trades</button>
+      <button class="tab-btn" data-tab="tab-history">Historical Archive (Manual Backtesting)</button>
+      <button class="tab-btn" data-tab="tab-diagnostics">ML Diagnostics & Models</button>
+      <button class="tab-btn" data-tab="tab-pine">TradingView Pine v6 Script</button>
+    </div>
+
+    <!-- TAB 1: Tomorrow's Picks -->
+    <div id="tab-picks" class="tab-content active">
+      <div class="controls-bar">
+        <input type="text" id="search-input" placeholder="Search Ticker (e.g. TATA)..." oninput="filterLivePicks()">
+        <select id="conviction-filter" onchange="filterLivePicks()">
+          <option value="ALL">All Signals</option>
+          <option value="HIGH">High Conviction Only (>=95% Specificity)</option>
+          <option value="MODERATE">Moderate Conviction</option>
+        </select>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Conviction</th>
+              <th>Surge Prob</th>
+              <th>Current Price</th>
+              <th>Stop Loss (ATR)</th>
+              <th>Target 1 (+5%)</th>
+              <th>Target 2 (+10%)</th>
+              <th>Target 3 (+18%)</th>
+              <th>Risk:Reward</th>
+              <th>Technical Catalysts</th>
+            </tr>
+          </thead>
+          <tbody id="live-picks-body">
+            <!-- Injected by app.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: Historical Archive -->
+    <div id="tab-history" class="tab-content">
+      <div class="controls-bar">
+        <label for="history-date-select" style="color:var(--text-muted); font-size:14px;">Select Archived Date:</label>
+        <select id="history-date-select" onchange="onHistoryDateChange()">
+          <!-- Populated from history.json -->
+        </select>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Conviction</th>
+              <th>Surge Prob</th>
+              <th>Session Price</th>
+              <th>Stop Loss (ATR)</th>
+              <th>Target 1 (+5%)</th>
+              <th>Target 2 (+10%)</th>
+              <th>Target 3 (+18%)</th>
+              <th>Risk:Reward</th>
+              <th>Catalysts</th>
+            </tr>
+          </thead>
+          <tbody id="history-picks-body">
+            <!-- Injected from history -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: ML Diagnostics -->
+    <div id="tab-diagnostics" class="tab-content">
+      <h3 style="margin-bottom:12px; font-size:18px;">Individual Model Performance (Holdout Test Data)</h3>
+      <div class="table-wrapper" style="margin-bottom:24px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Model Name</th>
+              <th>Test ROC-AUC</th>
+              <th>Test PR-AUC</th>
+              <th>Specificity (TN / TN+FP)</th>
+              <th>Precision</th>
+              <th>Recall / Sensitivity</th>
+              <th>Opt. Threshold</th>
+            </tr>
+          </thead>
+          <tbody id="models-table-body">
+            <!-- Injected -->
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-bottom:12px; font-size:18px;">Top Predictive Feature Drivers (Ensemble Weight)</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Feature Indicator</th>
+              <th style="width:50%;">Relative Weight</th>
+              <th>Importance %</th>
+            </tr>
+          </thead>
+          <tbody id="features-table-body">
+            <!-- Injected -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: TradingView Pine Script v6 -->
+    <div id="tab-pine" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <p style="color:var(--text-muted); font-size:14px;">
+          Copy this strategy script directly into TradingView Pine Editor v6.
+        </p>
+      </div>
+      <div class="code-container">
+        <button class="copy-btn" id="copy-btn" onclick="copyPineScript()">Copy Pine v6 Script</button>
+        <pre><code id="pine-v6-code">//@version=6
+strategy("NSE Breakout Surge ML Ensemble [v6]", overlay=true, initial_capital=100000, default_qty_type=strategy.percent_of_equity, default_qty_value=15, commission_type=strategy.commission.percent, commission_value=0.03, slippage=1, process_orders_on_close=true)
+
+threshold_score = input.float(72.0, "ML Score Threshold (0-100)")
+min_vol_surge = input.float(1.5, "Min Volume Surge Multiplier")
+lookback_breakout = input.int(20, "Breakout Lookback")
+
+target_1_pct = input.float(5.0, "Target 1 (%)")
+target_2_pct = input.float(10.0, "Target 2 (%)")
+target_3_pct = input.float(18.0, "Target 3 (%)")
+atr_len = input.int(14, "ATR Length")
+atr_sl_mult = input.float(1.5, "ATR SL Multiplier")
+max_sl_cap_pct = input.float(4.0, "Max SL Cap (%)")
+
+sma20 = ta.sma(close, 20)
+sma50 = ta.sma(close, 50)
+vol_sma20 = ta.sma(volume, 20)
+vol_surge = vol_sma20 > 0 ? (volume / vol_sma20) : 1.0
+rsi14 = ta.rsi(close, 14)
+atr_val = ta.atr(atr_len)
+
+highest_high = ta.highest(high, lookback_breakout)
+float score = 0.0
+if vol_surge >= min_vol_surge * 1.5
+    score += 35.0
+else if vol_surge >= min_vol_surge
+    score += 25.0
+if rsi14 >= 50.0 and rsi14 <= 78.0
+    score += 25.0
+if close > sma20 and sma20 > sma50
+    score += 20.0
+if close >= highest_high * 0.985
+    score += 20.0
+
+entry_condition = (score >= threshold_score) and (strategy.position_size == 0)
+var float stop_price = na
+var float tp1_price = na
+
+if entry_condition
+    float sl_dist = math.min(atr_val * atr_sl_mult, close * (max_sl_cap_pct / 100.0))
+    stop_price := close - sl_dist
+    tp1_price := close * (1.0 + target_1_pct / 100.0)
+    strategy.entry("ML_Surge_Long", strategy.long)
+
+if strategy.position_size > 0
+    strategy.exit("TP1_Exit", from_entry="ML_Surge_Long", limit=tp1_price, stop=stop_price)
+
+plot(sma20, "SMA 20", color=color.blue)
+plot(sma50, "SMA 50", color=color.orange)
+plotshape(entry_condition, "ML Surge", style=shape.triangleup, location=location.belowbar, color=color.green, size=size.normal)
+</code></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
