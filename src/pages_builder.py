@@ -14,8 +14,6 @@ from src.config import (
     DATA_DIR,
     LATEST_JSON,
     HISTORY_JSON,
-    BACKTEST_SUMMARY_JSON,
-    BACKTEST_TRADES_JSON,
     PINE_FILE
 )
 
@@ -51,12 +49,10 @@ def build_github_pages(
         "candidates": candidates
     }
     
-    # Write latest.json
     with open(LATEST_JSON, "w", encoding="utf-8") as f:
         json.dump(run_payload, f, indent=2)
     print(f" [PAGES] Written latest scan to: {LATEST_JSON}")
     
-    # Update history.json
     history_records = []
     if HISTORY_JSON.exists():
         try:
@@ -597,7 +593,7 @@ tr:hover td {
     <div id="tab-backtest" class="tab-content">
       <div class="controls-bar">
         <div style="color:var(--text-muted); font-size:14px;">
-          <strong>Adaptive Walk-Forward Backtest</strong> | Capital: <strong>₹1,00,000</strong> | Max / Trade: <strong>₹20,000 (Incl. Fees)</strong> | Capped Target: <strong>+5%</strong> | Error Penalty Feedback: <strong>ACTIVE</strong>
+          <strong>Adaptive Walk-Forward Backtest</strong> | Capital: <strong>₹1,00,000</strong> | Max / Trade: <strong>₹20,000 (Incl. Fees)</strong> | 10:15 AM First-Hour Confirmation | Dynamic ML Targets
         </div>
         <div class="export-group">
           <a href="../backtest_trade_log.csv" download class="btn-export" id="btn-dl-trades">📥 Download Trade Log CSV</a>
@@ -634,7 +630,7 @@ tr:hover td {
         </div>
       </div>
 
-      <h3 style="margin: 20px 0 12px 0; font-size: 18px;">Executed Intraday Trades Log (Selective Quality Gate &ge;65%)</h3>
+      <h3 style="margin: 20px 0 12px 0; font-size: 18px;">Executed Daily Trade Log (Confirmed at 10:15 AM)</h3>
       <div class="table-wrapper">
         <table>
           <thead>
@@ -642,7 +638,7 @@ tr:hover td {
               <th>Date</th>
               <th>Symbol</th>
               <th>Surge Prob</th>
-              <th>Entry (Open)</th>
+              <th>Entry (10:15 AM)</th>
               <th>Qty</th>
               <th>Total Outlay (w/ Fees)</th>
               <th>Exit Price</th>
