@@ -11,1225 +11,1225 @@
   {
     "date": "2026-02-24",
     "trades_count": 5,
-    "gross_pnl": -2552.84,
-    "charges": 145.61,
-    "net_pnl": -2698.45,
-    "equity": 94079.96,
-    "daily_return_pct": -2.79
+    "gross_pnl": -2044.06,
+    "charges": 145.81,
+    "net_pnl": -2189.87,
+    "equity": 94588.54,
+    "daily_return_pct": -2.26
   },
   {
     "date": "2026-02-25",
     "trades_count": 5,
-    "gross_pnl": -1371.85,
-    "charges": 142.13,
-    "net_pnl": -1513.98,
-    "equity": 92565.98,
-    "daily_return_pct": -1.61
+    "gross_pnl": -1548.66,
+    "charges": 142.97,
+    "net_pnl": -1691.63,
+    "equity": 92896.91,
+    "daily_return_pct": -1.79
   },
   {
     "date": "2026-02-26",
     "trades_count": 5,
-    "gross_pnl": 87.55,
-    "charges": 141.63,
-    "net_pnl": -54.08,
-    "equity": 92511.9,
-    "daily_return_pct": -0.06
+    "gross_pnl": 823.8,
+    "charges": 142.14,
+    "net_pnl": 681.66,
+    "equity": 93578.57,
+    "daily_return_pct": 0.73
   },
   {
     "date": "2026-02-27",
     "trades_count": 5,
-    "gross_pnl": -3027.28,
-    "charges": 138.79,
-    "net_pnl": -3166.07,
-    "equity": 89345.83,
-    "daily_return_pct": -3.42
+    "gross_pnl": -3212.3,
+    "charges": 140.24,
+    "net_pnl": -3352.54,
+    "equity": 90226.03,
+    "daily_return_pct": -3.58
   },
   {
     "date": "2026-03-02",
     "trades_count": 5,
-    "gross_pnl": -390.84,
-    "charges": 135.65,
-    "net_pnl": -526.49,
-    "equity": 88819.34,
-    "daily_return_pct": -0.59
+    "gross_pnl": 756.99,
+    "charges": 136.07,
+    "net_pnl": 620.92,
+    "equity": 90846.95,
+    "daily_return_pct": 0.69
   },
   {
     "date": "2026-03-04",
     "trades_count": 5,
-    "gross_pnl": -2329.15,
-    "charges": 133.05,
-    "net_pnl": -2462.2,
-    "equity": 86357.14,
-    "daily_return_pct": -2.77
+    "gross_pnl": -2427.91,
+    "charges": 136.27,
+    "net_pnl": -2564.18,
+    "equity": 88282.77,
+    "daily_return_pct": -2.82
   },
   {
     "date": "2026-03-05",
     "trades_count": 5,
-    "gross_pnl": 111.94,
-    "charges": 131.75,
-    "net_pnl": -19.81,
-    "equity": 86337.33,
-    "daily_return_pct": -0.02
+    "gross_pnl": 785.46,
+    "charges": 135.04,
+    "net_pnl": 650.42,
+    "equity": 88933.19,
+    "daily_return_pct": 0.74
   },
   {
     "date": "2026-03-06",
     "trades_count": 5,
-    "gross_pnl": -1749.92,
-    "charges": 130.45,
-    "net_pnl": -1880.37,
-    "equity": 84456.95,
-    "daily_return_pct": -2.18
+    "gross_pnl": -2494.83,
+    "charges": 133.83,
+    "net_pnl": -2628.66,
+    "equity": 86304.53,
+    "daily_return_pct": -2.96
   },
   {
     "date": "2026-03-09",
     "trades_count": 5,
-    "gross_pnl": 1526.07,
-    "charges": 130.43,
-    "net_pnl": 1395.64,
-    "equity": 85852.6,
-    "daily_return_pct": 1.65
+    "gross_pnl": 992.84,
+    "charges": 132.18,
+    "net_pnl": 860.66,
+    "equity": 87165.19,
+    "daily_return_pct": 1.0
   },
   {
     "date": "2026-03-10",
     "trades_count": 5,
-    "gross_pnl": -1600.54,
-    "charges": 129.85,
-    "net_pnl": -1730.39,
-    "equity": 84122.2,
+    "gross_pnl": -1626.54,
+    "charges": 131.85,
+    "net_pnl": -1758.39,
+    "equity": 85406.8,
     "daily_return_pct": -2.02
   },
   {
     "date": "2026-03-11",
     "trades_count": 5,
-    "gross_pnl": -119.09,
-    "charges": 126.94,
-    "net_pnl": -246.03,
-    "equity": 83876.17,
-    "daily_return_pct": -0.29
+    "gross_pnl": -96.16,
+    "charges": 129.64,
+    "net_pnl": -225.8,
+    "equity": 85181.0,
+    "daily_return_pct": -0.26
   },
   {
     "date": "2026-03-12",
     "trades_count": 5,
-    "gross_pnl": -563.82,
-    "charges": 127.76,
-    "net_pnl": -691.58,
-    "equity": 83184.59,
-    "daily_return_pct": -0.82
+    "gross_pnl": -547.46,
+    "charges": 129.74,
+    "net_pnl": -677.2,
+    "equity": 84503.8,
+    "daily_return_pct": -0.8
   },
   {
     "date": "2026-03-13",
     "trades_count": 5,
-    "gross_pnl": -2093.66,
-    "charges": 125.23,
-    "net_pnl": -2218.89,
-    "equity": 80965.71,
-    "daily_return_pct": -2.67
+    "gross_pnl": 836.66,
+    "charges": 128.96,
+    "net_pnl": 707.7,
+    "equity": 85211.5,
+    "daily_return_pct": 0.84
   },
   {
     "date": "2026-03-16",
     "trades_count": 5,
-    "gross_pnl": -1773.07,
-    "charges": 121.72,
-    "net_pnl": -1894.79,
-    "equity": 79070.92,
-    "daily_return_pct": -2.34
+    "gross_pnl": -1299.81,
+    "charges": 126.84,
+    "net_pnl": -1426.65,
+    "equity": 83784.85,
+    "daily_return_pct": -1.67
   },
   {
     "date": "2026-03-17",
     "trades_count": 5,
-    "gross_pnl": 611.59,
-    "charges": 120.89,
-    "net_pnl": 490.7,
-    "equity": 79561.62,
-    "daily_return_pct": 0.62
+    "gross_pnl": 471.49,
+    "charges": 128.2,
+    "net_pnl": 343.29,
+    "equity": 84128.14,
+    "daily_return_pct": 0.41
   },
   {
     "date": "2026-03-18",
     "trades_count": 5,
-    "gross_pnl": 756.57,
-    "charges": 121.22,
-    "net_pnl": 635.35,
-    "equity": 80196.96,
-    "daily_return_pct": 0.8
+    "gross_pnl": 1378.87,
+    "charges": 129.22,
+    "net_pnl": 1249.65,
+    "equity": 85377.79,
+    "daily_return_pct": 1.49
   },
   {
     "date": "2026-03-19",
     "trades_count": 5,
-    "gross_pnl": -1978.66,
-    "charges": 120.29,
-    "net_pnl": -2098.95,
-    "equity": 78098.02,
+    "gross_pnl": -2110.55,
+    "charges": 128.31,
+    "net_pnl": -2238.86,
+    "equity": 83138.93,
     "daily_return_pct": -2.62
   },
   {
     "date": "2026-03-20",
     "trades_count": 5,
-    "gross_pnl": 718.37,
-    "charges": 119.99,
-    "net_pnl": 598.38,
-    "equity": 78696.4,
-    "daily_return_pct": 0.77
+    "gross_pnl": -481.0,
+    "charges": 126.55,
+    "net_pnl": -607.55,
+    "equity": 82531.38,
+    "daily_return_pct": -0.73
   },
   {
     "date": "2026-03-23",
     "trades_count": 5,
-    "gross_pnl": -3104.79,
-    "charges": 116.23,
-    "net_pnl": -3221.02,
-    "equity": 75475.37,
-    "daily_return_pct": -4.09
+    "gross_pnl": -2843.1,
+    "charges": 123.22,
+    "net_pnl": -2966.32,
+    "equity": 79565.06,
+    "daily_return_pct": -3.59
   },
   {
     "date": "2026-03-24",
     "trades_count": 5,
-    "gross_pnl": 1577.42,
-    "charges": 115.09,
-    "net_pnl": 1462.33,
-    "equity": 76937.7,
-    "daily_return_pct": 1.94
+    "gross_pnl": 1624.35,
+    "charges": 119.66,
+    "net_pnl": 1504.69,
+    "equity": 81069.75,
+    "daily_return_pct": 1.89
   },
   {
     "date": "2026-03-25",
     "trades_count": 5,
-    "gross_pnl": -1245.54,
-    "charges": 116.5,
-    "net_pnl": -1362.04,
-    "equity": 75575.66,
+    "gross_pnl": -1312.81,
+    "charges": 122.76,
+    "net_pnl": -1435.57,
+    "equity": 79634.18,
     "daily_return_pct": -1.77
   },
   {
     "date": "2026-03-27",
     "trades_count": 5,
-    "gross_pnl": -3009.6,
-    "charges": 112.75,
-    "net_pnl": -3122.35,
-    "equity": 72453.31,
+    "gross_pnl": -3173.24,
+    "charges": 118.81,
+    "net_pnl": -3292.05,
+    "equity": 76342.13,
     "daily_return_pct": -4.13
   },
   {
     "date": "2026-03-30",
     "trades_count": 5,
-    "gross_pnl": -2881.08,
-    "charges": 107.72,
-    "net_pnl": -2988.8,
-    "equity": 69464.51,
-    "daily_return_pct": -4.13
+    "gross_pnl": -3043.73,
+    "charges": 113.86,
+    "net_pnl": -3157.59,
+    "equity": 73184.54,
+    "daily_return_pct": -4.14
   },
   {
     "date": "2026-04-01",
     "trades_count": 5,
-    "gross_pnl": 2839.5,
-    "charges": 108.47,
-    "net_pnl": 2731.03,
-    "equity": 72195.54,
-    "daily_return_pct": 3.93
+    "gross_pnl": 3644.02,
+    "charges": 114.98,
+    "net_pnl": 3529.04,
+    "equity": 76713.58,
+    "daily_return_pct": 4.82
   },
   {
     "date": "2026-04-02",
     "trades_count": 5,
-    "gross_pnl": -2039.68,
-    "charges": 108.48,
-    "net_pnl": -2148.16,
-    "equity": 70047.38,
+    "gross_pnl": -2170.7,
+    "charges": 115.4,
+    "net_pnl": -2286.1,
+    "equity": 74427.48,
     "daily_return_pct": -2.98
   },
   {
     "date": "2026-04-06",
     "trades_count": 5,
-    "gross_pnl": 693.6,
-    "charges": 107.53,
-    "net_pnl": 586.07,
-    "equity": 70633.45,
+    "gross_pnl": 736.6,
+    "charges": 114.25,
+    "net_pnl": 622.35,
+    "equity": 75049.83,
     "daily_return_pct": 0.84
   },
   {
     "date": "2026-04-07",
     "trades_count": 5,
-    "gross_pnl": 2447.5,
-    "charges": 108.73,
-    "net_pnl": 2338.77,
-    "equity": 72972.22,
-    "daily_return_pct": 3.31
+    "gross_pnl": 2591.76,
+    "charges": 114.02,
+    "net_pnl": 2477.74,
+    "equity": 77527.57,
+    "daily_return_pct": 3.3
   },
   {
     "date": "2026-04-08",
     "trades_count": 5,
-    "gross_pnl": -262.59,
-    "charges": 110.93,
-    "net_pnl": -373.52,
-    "equity": 72598.7,
-    "daily_return_pct": -0.51
+    "gross_pnl": -1068.83,
+    "charges": 117.17,
+    "net_pnl": -1186.0,
+    "equity": 76341.57,
+    "daily_return_pct": -1.53
   },
   {
     "date": "2026-04-09",
     "trades_count": 5,
-    "gross_pnl": -960.86,
-    "charges": 109.87,
-    "net_pnl": -1070.73,
-    "equity": 71527.97,
-    "daily_return_pct": -1.47
+    "gross_pnl": -821.15,
+    "charges": 115.06,
+    "net_pnl": -936.21,
+    "equity": 75405.36,
+    "daily_return_pct": -1.23
   },
   {
     "date": "2026-04-10",
     "trades_count": 5,
-    "gross_pnl": 1044.05,
-    "charges": 109.9,
-    "net_pnl": 934.15,
-    "equity": 72462.12,
-    "daily_return_pct": 1.31
+    "gross_pnl": 1082.11,
+    "charges": 114.18,
+    "net_pnl": 967.93,
+    "equity": 76373.29,
+    "daily_return_pct": 1.28
   },
   {
     "date": "2026-04-13",
     "trades_count": 5,
-    "gross_pnl": -293.54,
-    "charges": 109.64,
-    "net_pnl": -403.18,
-    "equity": 72058.94,
-    "daily_return_pct": -0.56
+    "gross_pnl": -502.88,
+    "charges": 115.93,
+    "net_pnl": -618.81,
+    "equity": 75754.48,
+    "daily_return_pct": -0.81
   },
   {
     "date": "2026-04-15",
     "trades_count": 5,
-    "gross_pnl": 1794.5,
-    "charges": 111.03,
-    "net_pnl": 1683.47,
-    "equity": 73742.41,
-    "daily_return_pct": 2.34
+    "gross_pnl": 1803.61,
+    "charges": 116.7,
+    "net_pnl": 1686.91,
+    "equity": 77441.39,
+    "daily_return_pct": 2.23
   },
   {
     "date": "2026-04-16",
     "trades_count": 5,
-    "gross_pnl": 894.49,
-    "charges": 113.16,
-    "net_pnl": 781.33,
-    "equity": 74523.74,
-    "daily_return_pct": 1.06
+    "gross_pnl": 1141.69,
+    "charges": 119.05,
+    "net_pnl": 1022.64,
+    "equity": 78464.03,
+    "daily_return_pct": 1.32
   },
   {
     "date": "2026-04-17",
     "trades_count": 5,
-    "gross_pnl": 190.62,
-    "charges": 113.89,
-    "net_pnl": 76.73,
-    "equity": 74600.47,
-    "daily_return_pct": 0.1
+    "gross_pnl": -224.9,
+    "charges": 119.16,
+    "net_pnl": -344.06,
+    "equity": 78119.97,
+    "daily_return_pct": -0.44
   },
   {
     "date": "2026-04-20",
     "trades_count": 5,
-    "gross_pnl": -1102.63,
-    "charges": 112.34,
-    "net_pnl": -1214.97,
-    "equity": 73385.5,
-    "daily_return_pct": -1.63
+    "gross_pnl": -207.45,
+    "charges": 118.81,
+    "net_pnl": -326.26,
+    "equity": 77793.71,
+    "daily_return_pct": -0.42
   },
   {
     "date": "2026-04-21",
     "trades_count": 5,
-    "gross_pnl": 894.78,
-    "charges": 111.97,
-    "net_pnl": 782.81,
-    "equity": 74168.31,
-    "daily_return_pct": 1.07
+    "gross_pnl": 531.67,
+    "charges": 119.2,
+    "net_pnl": 412.47,
+    "equity": 78206.18,
+    "daily_return_pct": 0.53
   },
   {
     "date": "2026-04-22",
     "trades_count": 5,
-    "gross_pnl": -823.17,
-    "charges": 111.28,
-    "net_pnl": -934.45,
-    "equity": 73233.86,
-    "daily_return_pct": -1.26
+    "gross_pnl": -1514.87,
+    "charges": 117.67,
+    "net_pnl": -1632.54,
+    "equity": 76573.64,
+    "daily_return_pct": -2.09
   },
   {
     "date": "2026-04-23",
     "trades_count": 5,
-    "gross_pnl": -32.9,
-    "charges": 110.32,
-    "net_pnl": -143.22,
-    "equity": 73090.64,
-    "daily_return_pct": -0.2
+    "gross_pnl": -691.74,
+    "charges": 114.87,
+    "net_pnl": -806.61,
+    "equity": 75767.03,
+    "daily_return_pct": -1.05
   },
   {
     "date": "2026-04-24",
     "trades_count": 5,
-    "gross_pnl": -816.27,
-    "charges": 108.94,
-    "net_pnl": -925.21,
-    "equity": 72165.43,
-    "daily_return_pct": -1.27
+    "gross_pnl": -1516.02,
+    "charges": 114.13,
+    "net_pnl": -1630.15,
+    "equity": 74136.88,
+    "daily_return_pct": -2.15
   },
   {
     "date": "2026-04-27",
     "trades_count": 5,
-    "gross_pnl": -638.84,
-    "charges": 109.0,
-    "net_pnl": -747.84,
-    "equity": 71417.59,
-    "daily_return_pct": -1.04
+    "gross_pnl": -650.67,
+    "charges": 111.19,
+    "net_pnl": -761.86,
+    "equity": 73375.02,
+    "daily_return_pct": -1.03
   },
   {
     "date": "2026-04-28",
     "trades_count": 5,
-    "gross_pnl": 3.12,
-    "charges": 105.64,
-    "net_pnl": -102.52,
-    "equity": 71315.07,
-    "daily_return_pct": -0.14
+    "gross_pnl": -198.53,
+    "charges": 108.68,
+    "net_pnl": -307.21,
+    "equity": 73067.81,
+    "daily_return_pct": -0.42
   },
   {
     "date": "2026-04-29",
     "trades_count": 5,
-    "gross_pnl": -1231.04,
-    "charges": 106.9,
-    "net_pnl": -1337.94,
-    "equity": 69977.13,
-    "daily_return_pct": -1.88
+    "gross_pnl": -1872.94,
+    "charges": 109.5,
+    "net_pnl": -1982.44,
+    "equity": 71085.37,
+    "daily_return_pct": -2.71
   },
   {
     "date": "2026-04-30",
     "trades_count": 5,
-    "gross_pnl": 1401.35,
-    "charges": 105.31,
-    "net_pnl": 1296.04,
-    "equity": 71273.17,
-    "daily_return_pct": 1.85
+    "gross_pnl": -733.2,
+    "charges": 106.79,
+    "net_pnl": -839.99,
+    "equity": 70245.38,
+    "daily_return_pct": -1.18
   },
   {
     "date": "2026-05-04",
     "trades_count": 5,
-    "gross_pnl": 208.6,
-    "charges": 106.08,
-    "net_pnl": 102.52,
-    "equity": 71375.69,
-    "daily_return_pct": 0.14
+    "gross_pnl": 1116.55,
+    "charges": 104.96,
+    "net_pnl": 1011.59,
+    "equity": 71256.97,
+    "daily_return_pct": 1.44
   },
   {
     "date": "2026-05-05",
     "trades_count": 5,
-    "gross_pnl": 753.82,
-    "charges": 107.73,
-    "net_pnl": 646.09,
-    "equity": 72021.78,
-    "daily_return_pct": 0.91
+    "gross_pnl": 1229.77,
+    "charges": 108.49,
+    "net_pnl": 1121.28,
+    "equity": 72378.25,
+    "daily_return_pct": 1.57
   },
   {
     "date": "2026-05-06",
     "trades_count": 5,
-    "gross_pnl": -473.51,
-    "charges": 107.48,
-    "net_pnl": -580.99,
-    "equity": 71440.79,
-    "daily_return_pct": -0.81
+    "gross_pnl": -694.06,
+    "charges": 108.28,
+    "net_pnl": -802.34,
+    "equity": 71575.91,
+    "daily_return_pct": -1.11
   },
   {
     "date": "2026-05-07",
     "trades_count": 5,
-    "gross_pnl": 2192.64,
-    "charges": 109.86,
-    "net_pnl": 2082.78,
-    "equity": 73523.57,
-    "daily_return_pct": 2.92
+    "gross_pnl": 2472.88,
+    "charges": 111.41,
+    "net_pnl": 2361.47,
+    "equity": 73937.38,
+    "daily_return_pct": 3.3
   },
   {
     "date": "2026-05-08",
     "trades_count": 5,
-    "gross_pnl": -1599.68,
-    "charges": 111.01,
-    "net_pnl": -1710.69,
-    "equity": 71812.88,
-    "daily_return_pct": -2.33
+    "gross_pnl": -875.55,
+    "charges": 112.27,
+    "net_pnl": -987.82,
+    "equity": 72949.56,
+    "daily_return_pct": -1.34
   },
   {
     "date": "2026-05-11",
     "trades_count": 5,
-    "gross_pnl": -451.41,
-    "charges": 107.81,
-    "net_pnl": -559.22,
-    "equity": 71253.66,
-    "daily_return_pct": -0.78
+    "gross_pnl": -450.13,
+    "charges": 109.25,
+    "net_pnl": -559.38,
+    "equity": 72390.18,
+    "daily_return_pct": -0.77
   },
   {
     "date": "2026-05-12",
     "trades_count": 5,
-    "gross_pnl": -1732.28,
-    "charges": 107.29,
-    "net_pnl": -1839.57,
-    "equity": 69414.09,
-    "daily_return_pct": -2.58
+    "gross_pnl": -1750.03,
+    "charges": 108.62,
+    "net_pnl": -1858.65,
+    "equity": 70531.53,
+    "daily_return_pct": -2.57
   },
   {
     "date": "2026-05-13",
     "trades_count": 5,
-    "gross_pnl": 675.58,
-    "charges": 105.64,
-    "net_pnl": 569.94,
-    "equity": 69984.03,
+    "gross_pnl": 685.1,
+    "charges": 106.92,
+    "net_pnl": 578.18,
+    "equity": 71109.71,
     "daily_return_pct": 0.82
   },
   {
     "date": "2026-05-14",
     "trades_count": 5,
-    "gross_pnl": -831.23,
-    "charges": 104.36,
-    "net_pnl": -935.59,
-    "equity": 69048.44,
-    "daily_return_pct": -1.34
+    "gross_pnl": -1730.96,
+    "charges": 104.97,
+    "net_pnl": -1835.93,
+    "equity": 69273.78,
+    "daily_return_pct": -2.58
   },
   {
     "date": "2026-05-15",
     "trades_count": 5,
-    "gross_pnl": -1770.64,
-    "charges": 102.9,
-    "net_pnl": -1873.54,
-    "equity": 67174.9,
-    "daily_return_pct": -2.71
+    "gross_pnl": -1472.07,
+    "charges": 104.46,
+    "net_pnl": -1576.53,
+    "equity": 67697.25,
+    "daily_return_pct": -2.28
   },
   {
     "date": "2026-05-18",
     "trades_count": 5,
-    "gross_pnl": 819.14,
-    "charges": 103.01,
-    "net_pnl": 716.13,
-    "equity": 67891.03,
-    "daily_return_pct": 1.07
+    "gross_pnl": 317.9,
+    "charges": 102.78,
+    "net_pnl": 215.12,
+    "equity": 67912.37,
+    "daily_return_pct": 0.32
   },
   {
     "date": "2026-05-19",
     "trades_count": 5,
-    "gross_pnl": -2093.06,
-    "charges": 101.43,
-    "net_pnl": -2194.49,
-    "equity": 65696.54,
-    "daily_return_pct": -3.23
+    "gross_pnl": -1188.9,
+    "charges": 100.39,
+    "net_pnl": -1289.29,
+    "equity": 66623.08,
+    "daily_return_pct": -1.9
   },
   {
     "date": "2026-05-20",
     "trades_count": 5,
-    "gross_pnl": -790.89,
-    "charges": 99.53,
-    "net_pnl": -890.42,
-    "equity": 64806.12,
-    "daily_return_pct": -1.36
+    "gross_pnl": -1470.57,
+    "charges": 100.47,
+    "net_pnl": -1571.04,
+    "equity": 65052.04,
+    "daily_return_pct": -2.36
   },
   {
     "date": "2026-05-21",
     "trades_count": 5,
-    "gross_pnl": -1568.86,
-    "charges": 97.5,
-    "net_pnl": -1666.36,
-    "equity": 63139.76,
-    "daily_return_pct": -2.57
+    "gross_pnl": -1777.98,
+    "charges": 97.78,
+    "net_pnl": -1875.76,
+    "equity": 63176.28,
+    "daily_return_pct": -2.88
   },
   {
     "date": "2026-05-22",
     "trades_count": 5,
-    "gross_pnl": 693.99,
-    "charges": 97.09,
-    "net_pnl": 596.9,
-    "equity": 63736.66,
-    "daily_return_pct": 0.95
+    "gross_pnl": -122.76,
+    "charges": 96.36,
+    "net_pnl": -219.12,
+    "equity": 62957.16,
+    "daily_return_pct": -0.35
   },
   {
     "date": "2026-05-25",
     "trades_count": 5,
-    "gross_pnl": 1900.3,
-    "charges": 99.04,
-    "net_pnl": 1801.26,
-    "equity": 65537.92,
-    "daily_return_pct": 2.83
+    "gross_pnl": 406.2,
+    "charges": 96.62,
+    "net_pnl": 309.58,
+    "equity": 63266.74,
+    "daily_return_pct": 0.49
   },
   {
     "date": "2026-05-26",
     "trades_count": 5,
-    "gross_pnl": -812.86,
-    "charges": 98.47,
-    "net_pnl": -911.33,
-    "equity": 64626.59,
-    "daily_return_pct": -1.39
+    "gross_pnl": -780.1,
+    "charges": 94.95,
+    "net_pnl": -875.05,
+    "equity": 62391.69,
+    "daily_return_pct": -1.38
   },
   {
     "date": "2026-05-27",
     "trades_count": 5,
-    "gross_pnl": -927.57,
-    "charges": 97.95,
-    "net_pnl": -1025.52,
-    "equity": 63601.07,
-    "daily_return_pct": -1.59
+    "gross_pnl": -1613.25,
+    "charges": 93.61,
+    "net_pnl": -1706.86,
+    "equity": 60684.83,
+    "daily_return_pct": -2.74
   },
   {
     "date": "2026-05-29",
     "trades_count": 5,
-    "gross_pnl": -949.99,
-    "charges": 96.33,
-    "net_pnl": -1046.32,
-    "equity": 62554.75,
-    "daily_return_pct": -1.65
+    "gross_pnl": -2032.78,
+    "charges": 90.92,
+    "net_pnl": -2123.7,
+    "equity": 58561.13,
+    "daily_return_pct": -3.5
   },
   {
     "date": "2026-06-01",
     "trades_count": 5,
-    "gross_pnl": -424.68,
-    "charges": 93.66,
-    "net_pnl": -518.34,
-    "equity": 62036.41,
-    "daily_return_pct": -0.83
+    "gross_pnl": -1133.55,
+    "charges": 86.83,
+    "net_pnl": -1220.38,
+    "equity": 57340.75,
+    "daily_return_pct": -2.08
   },
   {
     "date": "2026-06-02",
     "trades_count": 5,
-    "gross_pnl": 419.05,
-    "charges": 94.98,
-    "net_pnl": 324.07,
-    "equity": 62360.48,
-    "daily_return_pct": 0.52
+    "gross_pnl": 1090.79,
+    "charges": 88.06,
+    "net_pnl": 1002.73,
+    "equity": 58343.48,
+    "daily_return_pct": 1.75
   },
   {
     "date": "2026-06-03",
     "trades_count": 5,
-    "gross_pnl": -608.07,
-    "charges": 93.85,
-    "net_pnl": -701.92,
-    "equity": 61658.56,
-    "daily_return_pct": -1.13
+    "gross_pnl": -468.73,
+    "charges": 87.73,
+    "net_pnl": -556.46,
+    "equity": 57787.02,
+    "daily_return_pct": -0.95
   },
   {
     "date": "2026-06-04",
     "trades_count": 5,
-    "gross_pnl": -266.59,
-    "charges": 93.2,
-    "net_pnl": -359.79,
-    "equity": 61298.77,
-    "daily_return_pct": -0.58
+    "gross_pnl": -866.6,
+    "charges": 86.9,
+    "net_pnl": -953.5,
+    "equity": 56833.52,
+    "daily_return_pct": -1.65
   },
   {
     "date": "2026-06-05",
     "trades_count": 5,
-    "gross_pnl": 248.44,
-    "charges": 93.95,
-    "net_pnl": 154.49,
-    "equity": 61453.26,
+    "gross_pnl": 229.7,
+    "charges": 87.06,
+    "net_pnl": 142.64,
+    "equity": 56976.16,
     "daily_return_pct": 0.25
   },
   {
     "date": "2026-06-08",
     "trades_count": 5,
-    "gross_pnl": -288.81,
-    "charges": 93.12,
-    "net_pnl": -381.93,
-    "equity": 61071.33,
-    "daily_return_pct": -0.62
+    "gross_pnl": -16.58,
+    "charges": 87.09,
+    "net_pnl": -103.67,
+    "equity": 56872.49,
+    "daily_return_pct": -0.18
   },
   {
     "date": "2026-06-09",
     "trades_count": 5,
-    "gross_pnl": 765.43,
-    "charges": 93.76,
-    "net_pnl": 671.67,
-    "equity": 61743.0,
-    "daily_return_pct": 1.1
+    "gross_pnl": 1260.48,
+    "charges": 86.86,
+    "net_pnl": 1173.62,
+    "equity": 58046.11,
+    "daily_return_pct": 2.06
   },
   {
     "date": "2026-06-10",
     "trades_count": 5,
-    "gross_pnl": -239.08,
-    "charges": 93.28,
-    "net_pnl": -332.36,
-    "equity": 61410.64,
+    "gross_pnl": -225.15,
+    "charges": 87.68,
+    "net_pnl": -312.83,
+    "equity": 57733.28,
     "daily_return_pct": -0.54
   },
   {
     "date": "2026-06-11",
     "trades_count": 5,
-    "gross_pnl": -308.07,
-    "charges": 93.39,
-    "net_pnl": -401.46,
-    "equity": 61009.18,
-    "daily_return_pct": -0.65
+    "gross_pnl": -1186.36,
+    "charges": 87.03,
+    "net_pnl": -1273.39,
+    "equity": 56459.89,
+    "daily_return_pct": -2.21
   },
   {
     "date": "2026-06-12",
     "trades_count": 5,
-    "gross_pnl": 52.3,
-    "charges": 92.25,
-    "net_pnl": -39.95,
-    "equity": 60969.23,
-    "daily_return_pct": -0.07
+    "gross_pnl": -675.1,
+    "charges": 85.57,
+    "net_pnl": -760.67,
+    "equity": 55699.22,
+    "daily_return_pct": -1.35
   },
   {
     "date": "2026-06-15",
     "trades_count": 5,
-    "gross_pnl": -347.9,
-    "charges": 91.66,
-    "net_pnl": -439.56,
-    "equity": 60529.67,
-    "daily_return_pct": -0.72
+    "gross_pnl": -617.3,
+    "charges": 82.48,
+    "net_pnl": -699.78,
+    "equity": 54999.44,
+    "daily_return_pct": -1.26
   },
   {
     "date": "2026-06-16",
     "trades_count": 5,
-    "gross_pnl": -1257.78,
-    "charges": 90.85,
-    "net_pnl": -1348.63,
-    "equity": 59181.04,
-    "daily_return_pct": -2.23
+    "gross_pnl": -871.71,
+    "charges": 83.13,
+    "net_pnl": -954.84,
+    "equity": 54044.6,
+    "daily_return_pct": -1.74
   },
   {
     "date": "2026-06-17",
     "trades_count": 5,
-    "gross_pnl": 18.74,
-    "charges": 90.21,
-    "net_pnl": -71.47,
-    "equity": 59109.57,
-    "daily_return_pct": -0.12
+    "gross_pnl": -229.24,
+    "charges": 81.26,
+    "net_pnl": -310.5,
+    "equity": 53734.1,
+    "daily_return_pct": -0.57
   },
   {
     "date": "2026-06-18",
     "trades_count": 5,
-    "gross_pnl": 802.3,
-    "charges": 91.02,
-    "net_pnl": 711.28,
-    "equity": 59820.85,
-    "daily_return_pct": 1.2
+    "gross_pnl": 789.38,
+    "charges": 82.65,
+    "net_pnl": 706.73,
+    "equity": 54440.83,
+    "daily_return_pct": 1.32
   },
   {
     "date": "2026-06-19",
     "trades_count": 5,
-    "gross_pnl": -85.69,
-    "charges": 89.35,
-    "net_pnl": -175.04,
-    "equity": 59645.81,
-    "daily_return_pct": -0.29
+    "gross_pnl": -401.55,
+    "charges": 82.58,
+    "net_pnl": -484.13,
+    "equity": 53956.7,
+    "daily_return_pct": -0.89
   },
   {
     "date": "2026-06-22",
     "trades_count": 5,
-    "gross_pnl": -36.77,
-    "charges": 89.14,
-    "net_pnl": -125.91,
-    "equity": 59519.9,
-    "daily_return_pct": -0.21
+    "gross_pnl": 464.9,
+    "charges": 82.18,
+    "net_pnl": 382.72,
+    "equity": 54339.42,
+    "daily_return_pct": 0.71
   },
   {
     "date": "2026-06-23",
     "trades_count": 5,
-    "gross_pnl": -480.14,
-    "charges": 90.52,
-    "net_pnl": -570.66,
-    "equity": 58949.24,
-    "daily_return_pct": -0.96
+    "gross_pnl": -601.37,
+    "charges": 82.52,
+    "net_pnl": -683.89,
+    "equity": 53655.53,
+    "daily_return_pct": -1.26
   },
   {
     "date": "2026-06-24",
     "trades_count": 5,
-    "gross_pnl": -705.55,
-    "charges": 88.77,
-    "net_pnl": -794.32,
-    "equity": 58154.92,
+    "gross_pnl": -643.37,
+    "charges": 81.25,
+    "net_pnl": -724.62,
+    "equity": 52930.91,
     "daily_return_pct": -1.35
   },
   {
     "date": "2026-06-25",
     "trades_count": 5,
-    "gross_pnl": 327.37,
-    "charges": 88.75,
-    "net_pnl": 238.62,
-    "equity": 58393.54,
+    "gross_pnl": 298.78,
+    "charges": 80.69,
+    "net_pnl": 218.09,
+    "equity": 53149.0,
     "daily_return_pct": 0.41
   },
   {
     "date": "2026-06-29",
     "trades_count": 5,
-    "gross_pnl": -291.66,
-    "charges": 88.64,
-    "net_pnl": -380.3,
-    "equity": 58013.24,
-    "daily_return_pct": -0.65
+    "gross_pnl": -643.04,
+    "charges": 80.32,
+    "net_pnl": -723.36,
+    "equity": 52425.64,
+    "daily_return_pct": -1.36
   },
   {
     "date": "2026-06-30",
     "trades_count": 5,
-    "gross_pnl": 764.4,
-    "charges": 89.02,
-    "net_pnl": 675.38,
-    "equity": 58688.62,
-    "daily_return_pct": 1.16
+    "gross_pnl": 555.16,
+    "charges": 80.23,
+    "net_pnl": 474.93,
+    "equity": 52900.57,
+    "daily_return_pct": 0.91
   },
   {
     "date": "2026-07-01",
     "trades_count": 5,
-    "gross_pnl": -852.92,
-    "charges": 88.5,
-    "net_pnl": -941.42,
-    "equity": 57747.2,
-    "daily_return_pct": -1.6
+    "gross_pnl": -651.94,
+    "charges": 79.61,
+    "net_pnl": -731.55,
+    "equity": 52169.02,
+    "daily_return_pct": -1.38
   },
   {
     "date": "2026-07-02",
     "trades_count": 5,
-    "gross_pnl": -78.49,
-    "charges": 87.5,
-    "net_pnl": -165.99,
-    "equity": 57581.21,
+    "gross_pnl": -73.75,
+    "charges": 78.55,
+    "net_pnl": -152.3,
+    "equity": 52016.72,
     "daily_return_pct": -0.29
   },
   {
     "date": "2026-07-03",
     "trades_count": 5,
-    "gross_pnl": -165.6,
-    "charges": 87.37,
-    "net_pnl": -252.97,
-    "equity": 57328.24,
+    "gross_pnl": -149.23,
+    "charges": 78.72,
+    "net_pnl": -227.95,
+    "equity": 51788.77,
     "daily_return_pct": -0.44
   },
   {
     "date": "2026-07-06",
     "trades_count": 5,
-    "gross_pnl": -1900.65,
-    "charges": 85.14,
-    "net_pnl": -1985.79,
-    "equity": 55342.45,
-    "daily_return_pct": -3.46
+    "gross_pnl": -1065.28,
+    "charges": 76.22,
+    "net_pnl": -1141.5,
+    "equity": 50647.27,
+    "daily_return_pct": -2.2
   },
   {
     "date": "2026-07-07",
     "trades_count": 5,
-    "gross_pnl": -988.25,
-    "charges": 82.94,
-    "net_pnl": -1071.19,
-    "equity": 54271.26,
-    "daily_return_pct": -1.94
+    "gross_pnl": -763.79,
+    "charges": 76.25,
+    "net_pnl": -840.04,
+    "equity": 49807.23,
+    "daily_return_pct": -1.66
   },
   {
     "date": "2026-07-08",
     "trades_count": 5,
-    "gross_pnl": -1124.14,
-    "charges": 81.57,
-    "net_pnl": -1205.71,
-    "equity": 53065.55,
-    "daily_return_pct": -2.22
+    "gross_pnl": -1033.78,
+    "charges": 75.03,
+    "net_pnl": -1108.81,
+    "equity": 48698.42,
+    "daily_return_pct": -2.23
   },
   {
     "date": "2026-07-09",
     "trades_count": 5,
-    "gross_pnl": 1068.61,
-    "charges": 81.29,
-    "net_pnl": 987.32,
-    "equity": 54052.87,
+    "gross_pnl": 981.15,
+    "charges": 74.87,
+    "net_pnl": 906.28,
+    "equity": 49604.7,
     "daily_return_pct": 1.86
   },
   {
     "date": "2026-07-10",
     "trades_count": 5,
-    "gross_pnl": 46.19,
-    "charges": 82.54,
-    "net_pnl": -36.35,
-    "equity": 54016.52,
-    "daily_return_pct": -0.07
+    "gross_pnl": 538.21,
+    "charges": 76.32,
+    "net_pnl": 461.89,
+    "equity": 50066.59,
+    "daily_return_pct": 0.93
   },
   {
     "date": "2026-07-13",
     "trades_count": 5,
-    "gross_pnl": 1136.56,
-    "charges": 83.53,
-    "net_pnl": 1053.03,
-    "equity": 55069.55,
-    "daily_return_pct": 1.95
+    "gross_pnl": 1299.87,
+    "charges": 72.69,
+    "net_pnl": 1227.18,
+    "equity": 51293.77,
+    "daily_return_pct": 2.45
   },
   {
     "date": "2026-07-14",
     "trades_count": 5,
-    "gross_pnl": -544.59,
-    "charges": 82.43,
-    "net_pnl": -627.02,
-    "equity": 54442.53,
-    "daily_return_pct": -1.14
+    "gross_pnl": 58.31,
+    "charges": 77.19,
+    "net_pnl": -18.88,
+    "equity": 51274.89,
+    "daily_return_pct": -0.04
   },
   {
     "date": "2026-07-15",
     "trades_count": 5,
-    "gross_pnl": -792.93,
-    "charges": 82.55,
-    "net_pnl": -875.48,
-    "equity": 53567.05,
-    "daily_return_pct": -1.61
+    "gross_pnl": -595.09,
+    "charges": 77.63,
+    "net_pnl": -672.72,
+    "equity": 50602.17,
+    "daily_return_pct": -1.31
   },
   {
     "date": "2026-07-16",
     "trades_count": 5,
-    "gross_pnl": 368.35,
-    "charges": 81.05,
-    "net_pnl": 287.3,
-    "equity": 53854.35,
-    "daily_return_pct": 0.54
+    "gross_pnl": 324.61,
+    "charges": 77.38,
+    "net_pnl": 247.23,
+    "equity": 50849.4,
+    "daily_return_pct": 0.49
   },
   {
     "date": "2026-07-17",
     "trades_count": 5,
-    "gross_pnl": -930.55,
-    "charges": 76.13,
-    "net_pnl": -1006.68,
-    "equity": 52847.67,
-    "daily_return_pct": -1.87
+    "gross_pnl": -1134.49,
+    "charges": 75.96,
+    "net_pnl": -1210.45,
+    "equity": 49638.95,
+    "daily_return_pct": -2.38
   },
   {
     "date": "2026-07-20",
     "trades_count": 5,
-    "gross_pnl": 92.27,
-    "charges": 80.3,
-    "net_pnl": 11.97,
-    "equity": 52859.64,
+    "gross_pnl": 86.72,
+    "charges": 75.77,
+    "net_pnl": 10.95,
+    "equity": 49649.9,
     "daily_return_pct": 0.02
   },
   {
     "date": "2026-07-21",
     "trades_count": 5,
-    "gross_pnl": 644.58,
-    "charges": 81.09,
-    "net_pnl": 563.49,
-    "equity": 53423.13,
-    "daily_return_pct": 1.07
+    "gross_pnl": 504.29,
+    "charges": 76.08,
+    "net_pnl": 428.21,
+    "equity": 50078.11,
+    "daily_return_pct": 0.86
   },
   {
     "date": "2026-07-22",
     "trades_count": 5,
-    "gross_pnl": -1481.38,
-    "charges": 79.61,
-    "net_pnl": -1560.99,
-    "equity": 51862.14,
-    "daily_return_pct": -2.92
+    "gross_pnl": -1384.71,
+    "charges": 74.45,
+    "net_pnl": -1459.16,
+    "equity": 48618.95,
+    "daily_return_pct": -2.91
   },
   {
     "date": "2026-07-23",
     "trades_count": 5,
-    "gross_pnl": -893.37,
-    "charges": 78.39,
-    "net_pnl": -971.76,
-    "equity": 50890.38,
-    "daily_return_pct": -1.87
+    "gross_pnl": -838.91,
+    "charges": 73.53,
+    "net_pnl": -912.44,
+    "equity": 47706.51,
+    "daily_return_pct": -1.88
   },
   {
     "date": "2026-07-24",
     "trades_count": 5,
-    "gross_pnl": -251.11,
-    "charges": 77.43,
-    "net_pnl": -328.54,
-    "equity": 50561.84,
-    "daily_return_pct": -0.65
+    "gross_pnl": 29.74,
+    "charges": 72.73,
+    "net_pnl": -42.99,
+    "equity": 47663.52,
+    "daily_return_pct": -0.09
   },
   {
     "date": "2026-07-27",
     "trades_count": 5,
-    "gross_pnl": -274.73,
-    "charges": 75.98,
-    "net_pnl": -350.71,
-    "equity": 50211.13,
-    "daily_return_pct": -0.69
+    "gross_pnl": -250.77,
+    "charges": 72.36,
+    "net_pnl": -323.13,
+    "equity": 47340.39,
+    "daily_return_pct": -0.68
   },
   {
     "date": "2026-07-28",
     "trades_count": 5,
-    "gross_pnl": 310.75,
-    "charges": 76.15,
-    "net_pnl": 234.6,
-    "equity": 50445.73,
-    "daily_return_pct": 0.47
+    "gross_pnl": 200.26,
+    "charges": 71.41,
+    "net_pnl": 128.85,
+    "equity": 47469.25,
+    "daily_return_pct": 0.27
   },
   {
     "date": "2026-07-29",
     "trades_count": 5,
-    "gross_pnl": -1691.04,
-    "charges": 74.93,
-    "net_pnl": -1765.97,
-    "equity": 48679.76,
-    "daily_return_pct": -3.5
+    "gross_pnl": -911.01,
+    "charges": 67.25,
+    "net_pnl": -978.26,
+    "equity": 46490.99,
+    "daily_return_pct": -2.06
   },
   {
     "date": "2026-07-30",
     "trades_count": 5,
-    "gross_pnl": 299.98,
-    "charges": 74.53,
-    "net_pnl": 225.45,
-    "equity": 48905.21,
-    "daily_return_pct": 0.46
+    "gross_pnl": 511.48,
+    "charges": 70.17,
+    "net_pnl": 441.31,
+    "equity": 46932.3,
+    "daily_return_pct": 0.95
   },
   {
     "date": "2026-07-31",
     "trades_count": 5,
-    "gross_pnl": -158.0,
-    "charges": 73.84,
-    "net_pnl": -231.84,
-    "equity": 48673.37,
-    "daily_return_pct": -0.47
+    "gross_pnl": -62.01,
+    "charges": 65.86,
+    "net_pnl": -127.87,
+    "equity": 46804.43,
+    "daily_return_pct": -0.27
   },
   {
     "date": "2026-08-03",
     "trades_count": 5,
-    "gross_pnl": 82.37,
-    "charges": 73.37,
-    "net_pnl": 9.0,
-    "equity": 48682.37,
-    "daily_return_pct": 0.02
+    "gross_pnl": 35.83,
+    "charges": 70.11,
+    "net_pnl": -34.28,
+    "equity": 46770.15,
+    "daily_return_pct": -0.07
   },
   {
     "date": "2026-08-04",
     "trades_count": 5,
-    "gross_pnl": -276.64,
-    "charges": 73.61,
-    "net_pnl": -350.25,
-    "equity": 48332.12,
-    "daily_return_pct": -0.72
+    "gross_pnl": -73.95,
+    "charges": 70.75,
+    "net_pnl": -144.7,
+    "equity": 46625.45,
+    "daily_return_pct": -0.31
   },
   {
     "date": "2026-08-05",
     "trades_count": 5,
-    "gross_pnl": 337.13,
-    "charges": 73.91,
-    "net_pnl": 263.22,
-    "equity": 48595.34,
-    "daily_return_pct": 0.54
+    "gross_pnl": 585.08,
+    "charges": 71.16,
+    "net_pnl": 513.92,
+    "equity": 47139.37,
+    "daily_return_pct": 1.1
   },
   {
     "date": "2026-08-06",
     "trades_count": 5,
-    "gross_pnl": 211.23,
-    "charges": 74.21,
-    "net_pnl": 137.02,
-    "equity": 48732.36,
-    "daily_return_pct": 0.28
+    "gross_pnl": 192.28,
+    "charges": 71.66,
+    "net_pnl": 120.62,
+    "equity": 47259.99,
+    "daily_return_pct": 0.26
   },
   {
     "date": "2026-08-07",
     "trades_count": 5,
-    "gross_pnl": -537.89,
-    "charges": 73.96,
-    "net_pnl": -611.85,
-    "equity": 48120.51,
-    "daily_return_pct": -1.26
+    "gross_pnl": -1067.1,
+    "charges": 70.99,
+    "net_pnl": -1138.09,
+    "equity": 46121.9,
+    "daily_return_pct": -2.41
   },
   {
     "date": "2026-08-10",
     "trades_count": 5,
-    "gross_pnl": -438.44,
-    "charges": 73.01,
-    "net_pnl": -511.45,
-    "equity": 47609.06,
-    "daily_return_pct": -1.06
+    "gross_pnl": -370.22,
+    "charges": 65.92,
+    "net_pnl": -436.14,
+    "equity": 45685.76,
+    "daily_return_pct": -0.95
   },
   {
     "date": "2026-08-11",
     "trades_count": 5,
-    "gross_pnl": -656.85,
-    "charges": 71.81,
-    "net_pnl": -728.66,
-    "equity": 46880.4,
-    "daily_return_pct": -1.53
+    "gross_pnl": 62.14,
+    "charges": 68.78,
+    "net_pnl": -6.64,
+    "equity": 45679.12,
+    "daily_return_pct": -0.01
   },
   {
     "date": "2026-08-12",
     "trades_count": 5,
-    "gross_pnl": 452.52,
-    "charges": 69.89,
-    "net_pnl": 382.63,
-    "equity": 47263.03,
-    "daily_return_pct": 0.82
+    "gross_pnl": 1215.98,
+    "charges": 70.13,
+    "net_pnl": 1145.85,
+    "equity": 46824.96,
+    "daily_return_pct": 2.51
   },
   {
     "date": "2026-08-13",
     "trades_count": 5,
-    "gross_pnl": 496.41,
-    "charges": 72.13,
-    "net_pnl": 424.28,
-    "equity": 47687.31,
-    "daily_return_pct": 0.9
+    "gross_pnl": 282.15,
+    "charges": 70.93,
+    "net_pnl": 211.22,
+    "equity": 47036.18,
+    "daily_return_pct": 0.45
   },
   {
     "date": "2026-08-14",
     "trades_count": 5,
-    "gross_pnl": -454.32,
-    "charges": 70.65,
-    "net_pnl": -524.97,
-    "equity": 47162.34,
-    "daily_return_pct": -1.1
+    "gross_pnl": -116.78,
+    "charges": 70.25,
+    "net_pnl": -187.03,
+    "equity": 46849.15,
+    "daily_return_pct": -0.4
   },
   {
     "date": "2026-08-17",
     "trades_count": 5,
-    "gross_pnl": 651.66,
-    "charges": 72.59,
-    "net_pnl": 579.07,
-    "equity": 47741.41,
-    "daily_return_pct": 1.23
+    "gross_pnl": 825.53,
+    "charges": 72.12,
+    "net_pnl": 753.41,
+    "equity": 47602.56,
+    "daily_return_pct": 1.61
   },
   {
     "date": "2026-08-18",
     "trades_count": 5,
-    "gross_pnl": 1091.21,
-    "charges": 73.86,
-    "net_pnl": 1017.35,
-    "equity": 48758.76,
-    "daily_return_pct": 2.13
+    "gross_pnl": 813.81,
+    "charges": 73.27,
+    "net_pnl": 740.54,
+    "equity": 48343.1,
+    "daily_return_pct": 1.56
   },
   {
     "date": "2026-08-19",
     "trades_count": 5,
-    "gross_pnl": -1074.75,
-    "charges": 73.53,
-    "net_pnl": -1148.28,
-    "equity": 47610.48,
-    "daily_return_pct": -2.36
+    "gross_pnl": -204.83,
+    "charges": 73.26,
+    "net_pnl": -278.09,
+    "equity": 48065.01,
+    "daily_return_pct": -0.58
   },
   {
     "date": "2026-08-20",
     "trades_count": 5,
-    "gross_pnl": -48.98,
-    "charges": 72.61,
-    "net_pnl": -121.59,
-    "equity": 47488.89,
-    "daily_return_pct": -0.26
+    "gross_pnl": -47.98,
+    "charges": 73.16,
+    "net_pnl": -121.14,
+    "equity": 47943.87,
+    "daily_return_pct": -0.25
   },
   {
     "date": "2026-08-21",
     "trades_count": 5,
-    "gross_pnl": -403.24,
-    "charges": 72.16,
-    "net_pnl": -475.4,
-    "equity": 47013.49,
-    "daily_return_pct": -1.0
+    "gross_pnl": -592.48,
+    "charges": 72.77,
+    "net_pnl": -665.25,
+    "equity": 47278.62,
+    "daily_return_pct": -1.39
   },
   {
     "date": "2026-08-24",
     "trades_count": 5,
-    "gross_pnl": -346.1,
-    "charges": 71.52,
-    "net_pnl": -417.62,
-    "equity": 46595.87,
-    "daily_return_pct": -0.89
+    "gross_pnl": -411.3,
+    "charges": 71.23,
+    "net_pnl": -482.53,
+    "equity": 46796.09,
+    "daily_return_pct": -1.02
   },
   {
     "date": "2026-08-25",
     "trades_count": 5,
-    "gross_pnl": -10.62,
-    "charges": 70.96,
-    "net_pnl": -81.58,
-    "equity": 46514.29,
-    "daily_return_pct": -0.18
+    "gross_pnl": 126.67,
+    "charges": 71.39,
+    "net_pnl": 55.28,
+    "equity": 46851.37,
+    "daily_return_pct": 0.12
   },
   {
     "date": "2026-08-26",
     "trades_count": 5,
-    "gross_pnl": -495.22,
-    "charges": 70.1,
-    "net_pnl": -565.32,
-    "equity": 45948.97,
-    "daily_return_pct": -1.22
+    "gross_pnl": -364.39,
+    "charges": 71.28,
+    "net_pnl": -435.67,
+    "equity": 46415.7,
+    "daily_return_pct": -0.93
   },
   {
     "date": "2026-08-27",
     "trades_count": 5,
-    "gross_pnl": -845.8,
-    "charges": 69.32,
-    "net_pnl": -915.12,
-    "equity": 45033.85,
+    "gross_pnl": -851.76,
+    "charges": 69.93,
+    "net_pnl": -921.69,
+    "equity": 45494.01,
     "daily_return_pct": -1.99
   },
   {
     "date": "2026-08-28",
     "trades_count": 5,
-    "gross_pnl": -721.89,
-    "charges": 68.09,
-    "net_pnl": -789.98,
-    "equity": 44243.87,
-    "daily_return_pct": -1.75
+    "gross_pnl": -730.02,
+    "charges": 68.86,
+    "net_pnl": -798.88,
+    "equity": 44695.13,
+    "daily_return_pct": -1.76
   },
   {
     "date": "2026-08-31",
     "trades_count": 5,
-    "gross_pnl": 124.88,
-    "charges": 67.57,
-    "net_pnl": 57.31,
-    "equity": 44301.18,
+    "gross_pnl": 125.69,
+    "charges": 68.26,
+    "net_pnl": 57.43,
+    "equity": 44752.56,
     "daily_return_pct": 0.13
   },
   {
     "date": "2026-09-01",
     "trades_count": 5,
-    "gross_pnl": -614.68,
-    "charges": 66.52,
-    "net_pnl": -681.2,
-    "equity": 43619.98,
-    "daily_return_pct": -1.54
+    "gross_pnl": -230.79,
+    "charges": 67.03,
+    "net_pnl": -297.82,
+    "equity": 44454.74,
+    "daily_return_pct": -0.67
   },
   {
     "date": "2026-09-02",
     "trades_count": 5,
-    "gross_pnl": -143.97,
-    "charges": 66.21,
-    "net_pnl": -210.18,
-    "equity": 43409.8,
-    "daily_return_pct": -0.48
+    "gross_pnl": -157.07,
+    "charges": 67.2,
+    "net_pnl": -224.27,
+    "equity": 44230.47,
+    "daily_return_pct": -0.5
   },
   {
     "date": "2026-09-03",
     "trades_count": 5,
-    "gross_pnl": 318.02,
-    "charges": 64.98,
-    "net_pnl": 253.04,
-    "equity": 43662.84,
-    "daily_return_pct": 0.58
+    "gross_pnl": 313.2,
+    "charges": 66.08,
+    "net_pnl": 247.12,
+    "equity": 44477.59,
+    "daily_return_pct": 0.56
   },
   {
     "date": "2026-09-04",
     "trades_count": 5,
-    "gross_pnl": 309.55,
-    "charges": 66.96,
-    "net_pnl": 242.59,
-    "equity": 43905.43,
-    "daily_return_pct": 0.56
+    "gross_pnl": 12.89,
+    "charges": 67.48,
+    "net_pnl": -54.59,
+    "equity": 44423.0,
+    "daily_return_pct": -0.12
   },
   {
     "date": "2026-09-07",
     "trades_count": 5,
-    "gross_pnl": -532.59,
-    "charges": 65.65,
-    "net_pnl": -598.24,
-    "equity": 43307.19,
-    "daily_return_pct": -1.36
+    "gross_pnl": -535.27,
+    "charges": 66.59,
+    "net_pnl": -601.86,
+    "equity": 43821.14,
+    "daily_return_pct": -1.35
   },
   {
     "date": "2026-09-08",
     "trades_count": 5,
-    "gross_pnl": -72.38,
-    "charges": 65.16,
-    "net_pnl": -137.54,
-    "equity": 43169.65,
+    "gross_pnl": -73.98,
+    "charges": 66.22,
+    "net_pnl": -140.2,
+    "equity": 43680.94,
     "daily_return_pct": -0.32
   },
   {
     "date": "2026-09-09",
     "trades_count": 5,
-    "gross_pnl": 46.11,
-    "charges": 66.0,
-    "net_pnl": -19.89,
-    "equity": 43149.76,
+    "gross_pnl": 44.06,
+    "charges": 66.76,
+    "net_pnl": -22.7,
+    "equity": 43658.24,
     "daily_return_pct": -0.05
   },
   {
     "date": "2026-09-10",
     "trades_count": 5,
-    "gross_pnl": -460.6,
-    "charges": 65.27,
-    "net_pnl": -525.87,
-    "equity": 42623.89,
-    "daily_return_pct": -1.22
+    "gross_pnl": 14.46,
+    "charges": 66.76,
+    "net_pnl": -52.3,
+    "equity": 43605.94,
+    "daily_return_pct": -0.12
   },
   {
     "date": "2026-09-11",
     "trades_count": 5,
-    "gross_pnl": 11.15,
-    "charges": 65.12,
-    "net_pnl": -53.97,
-    "equity": 42569.92,
-    "daily_return_pct": -0.13
+    "gross_pnl": -214.93,
+    "charges": 66.27,
+    "net_pnl": -281.2,
+    "equity": 43324.74,
+    "daily_return_pct": -0.64
   }
 ]
