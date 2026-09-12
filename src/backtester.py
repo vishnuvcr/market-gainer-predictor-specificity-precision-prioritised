@@ -430,4 +430,6 @@ class WalkForwardBacktester:
         with open(DATA_DIR / "backtest_daily.json", "w", encoding="utf-8") as f:
             json.dump(self.daily_pnl_records, f, indent=2)
             
-        pd.DataFrame(self.trades).to_csv(
+        pd.DataFrame(self.trades).to_csv(BASE_DIR / "backtest_trade_log.csv", index=False)
+        pd.DataFrame(self.daily_pnl_records).to_csv(BASE_DIR / "backtest_daily_pnl.csv", index=False)
+        
