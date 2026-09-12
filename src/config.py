@@ -1,69 +1,83 @@
 """
-Configuration settings for Market Gainer Predictor (Specificity & Precision Prioritised)
+Configuration module optimized for maximum Precision and Specificity
+across large-scale NSE ticker universes with 5-year historical depth.
 """
-
+import os
 from pathlib import Path
 
 # ==========================================
-# 1. Project Paths
+# 1. Project Paths & File Artifacts
 # ==========================================
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
-MODELS_DIR = BASE_DIR / "models"
-REPORTS_DIR = BASE_DIR / "reports"
-OUTPUTS_DIR = BASE_DIR / "outputs"
+TICKERS_FILE = BASE_DIR / "tickers.txt"
+DOCS_DIR = BASE_DIR / "docs"
+DATA_DIR = DOCS_DIR / "data"
+STRATEGIES_DIR = BASE_DIR / "strategies"
 
-# Ensure runtime directories exist
-for directory in [DATA_DIR, MODELS_DIR, REPORTS_DIR, OUTPUTS_DIR]:
+# Ensure data and strategy directories exist
+for directory in [DATA_DIR, STRATEGIES_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
 
-# ==========================================
-# 2. Target & Threshold Definitions
-# ==========================================
-# Intraday surge threshold (5% gain from opening price to high next day)
-SURGE_THRESHOLD = 0.05
-
-# Minimum prediction confidence / probability cutoff for precision priority
-MIN_CONFIDENCE = 0.65
+LATEST_JSON = DATA_DIR / "latest.json"
+HISTORY_JSON = DATA_DIR / "history.json"
+BACKTEST_SUMMARY_JSON = DATA_DIR / "backtest_summary.json"
+BACKTEST_TRADES_JSON = DATA_DIR / "backtest_trades.json"
+BACKTEST_DAILY_JSON = DATA_DIR / "backtest_daily.json"
+PINE_FILE = STRATEGIES_DIR / "breakout_surge_v6.pine"
 
 # ==========================================
-# 3. Capital & Risk Management Defaults
+# 2. Historical Ingestion Config
 # ==========================================
-DEFAULT_CAPITAL = 100000.0       # ₹1,00,000 total capital
-MAX_PER_TRADE = 20000.0         # ₹20,000 max allocation per stock
-MAX_OPEN_POSITIONS = 5          # Number of concurrent trades
+LOOKBACK_DAYS = 1825         # ~5 years of daily trading data
+INTERVAL = "1d"              # Daily OHLCV data
+SHARD_SIZE = 50              # 50 tickers per parallel download shard
+MAX_WORKERS = 10             # 10 simultaneous download threads
 
 # ==========================================
-# 4. Pipeline & Model Parameters
+# 3. Target Labeling & ML Training
 # ==========================================
-DEFAULT_LIMIT = 150             # Top N stock universe limit
-RETRAIN_DAYS = 15               # Frequency to retrain the ML model (days)
+SURGE_THRESHOLD = 0.05       # Target: Next-day High >= Next-day Open * (1 + 0.05)
+MIN_TRAINING_SAMPLES = 1000  # Minimum historical samples required
+K_FOLDS = 5                  # K-fold temporal partitioning
+TEST_SIZE_RATIO = 0.20       # Out-of-time test set ratio (last 20% dates)
+TARGET_SPECIFICITY = 0.95    # Enforce >=95% specificity
+
+# Hyperparameter search budget
+MAX_TUNING_SAMPLES = 40000
+HYPERPARAM_SEARCH_ITER = 4
 RANDOM_STATE = 42
 
 # ==========================================
-# 5. Feature Columns
+# 4. Risk & Capital Settings
 # ==========================================
-# Must match the features generated in src/feature_engineering.py
-FEATURE_COLUMNS = [
-    # 1. Price Momentum & Returns
-    "return_1d",
-    "return_3d",
-    "return_5d",
+INITIAL_CAPITAL = 100000.0   # Default capital: ₹1,00,000
+MAX_CAPITAL_PER_TRADE = 20000.0  # Max per trade cap
+MIN_CONFIDENCE_THRESHOLD = 0.65  # Confidence cutoff for trade entries
+TARGET_1_PCT = 0.05          # +5% target 1
+TARGET_2_PCT = 0.10          # +10% target 2
+TARGET_3_PCT = 0.18          # +18% circuit target
+ATR_SL_MULTIPLIER = 1.5      # Stop loss distance: 1.5 * ATR(14)
+MAX_SL_PCT = 0.04            # Hard stop loss cap (4%)
+BREAKEVEN_TRIGGER_PCT = 0.025 # Move SL to entry at +2.5%
+
+# ==========================================
+# 5. Model Feature Columns
+# ==========================================
+FEATURE_COLUMNS = list((
+    # Price Momentum & Returns
+    "return_1d", "return_3d", "return_5d", "return_10d", "return_20d",
+    "vol_surge_20", "vol_surge_5", "turnover_surge",
     
-    # 2. Distance from Moving Averages & Highs
-    "dist_sma_20",
-    "dist_sma_50",
-    "dist_sma_200",
-    "dist_high_20d",
-    "gap_pct",
+    # Oscillators & Volatility
+    "rsi_14", "rsi_7", "rsi_slope_3",
+    "atr_pct_14", "candle_range_pct", "body_to_range", "clv",
+    "upper_shadow_pct", "lower_shadow_pct",
     
-    # 3. Bollinger Bands Dynamics
-    "bb_width_20",
-    "bb_pos_20",
-    
-    # 4. First-Hour Opening Range Indicators
-    "first_hour_return",
-    "first_hour_range",
-    "first_hour_clv",
-    "first_hour_vol_ratio",
-]
+    # Bands & Moving Averages
+    "bb_width_20", "bb_pos_20",
+    "dist_sma_20", "dist_sma_50", "dist_sma_200",
+    "dist_high_20d", "consecutive_up_days", "gap_pct",
+
+    # First-Hour Simulated Opening Range Features (if added in feature_engineering.py)
+    "first_hour_return", "first_hour_range", "first_hour_clv", "first_hour_vol_ratio"
+))
