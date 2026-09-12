@@ -51,28 +51,28 @@ RANDOM_STATE = 42
 # ==============================================================================
 INITIAL_CAPITAL = 100000.0        # ₹1,00,000 default capital
 MAX_CAPITAL_PER_TRADE = 20000.0   # ₹20,000 max outlay per trade
-MIN_CONFIDENCE_THRESHOLD = 0.65   # 65% minimum prediction probability
+MIN_CONFIDENCE_THRESHOLD = 0.50   # 50% minimum probability gate
 
-# Targets
-MIN_TARGET_PCT = 0.05             # Minimum target objective (+5%)
-TARGET_1_PCT = 0.05               # +5% first target
-TARGET_2_PCT = 0.10               # +10% second target
-TARGET_3_PCT = 0.18               # +18% circuit target
-MAX_TARGET_PCT = 0.18             # Upper bound target objective
-TARGET_CAP_PCT = 0.05             # Profit target cap
+# Targets & Screener Objectives
+MIN_TARGET_PCT = 0.045            # +4.5% minimum volatility target floor
+TARGET_1_PCT = 0.05               # +5.0% target 1
+TARGET_2_PCT = 0.10               # +10.0% target 2
+TARGET_3_PCT = 0.18               # +18.0% upper circuit target
+MAX_TARGET_PCT = 0.08             # +8.0% upper bound target
 
 # Stop Loss Bounds & Rules
-MIN_SL_PCT = 0.01                 # 1% minimum stop loss floor
-MAX_SL_PCT = 0.04                 # 4% maximum hard stop loss cap
+MIN_SL_PCT = 0.015                # 1.5% minimum stop loss bound
+MAX_SL_PCT = 0.035                # 3.5% maximum stop loss bound
 ATR_SL_MULTIPLIER = 1.5           # Stop loss = 1.5 * ATR(14)
-BREAKEVEN_TRIGGER_PCT = 0.025      # Move SL to entry at +2.5% surge
+BREAKEVEN_TRIGGER_PCT = 0.020     # Move SL to entry at +2.0% surge
 
-# Backtester Execution Defaults
-TOP_K = 5                         # Max 5 positions per day
-WARMUP_DAYS = 120                 # Warmup trading days
+# Daily Trade Quotas & Execution Cadence
+MAX_TRADES_PER_DAY = 5            # Maximum top picks per day
+MIN_DAILY_TRADES = 1              # Daily trade guarantee fallback
+TOP_K = 5                         # Top K setups
+WARMUP_DAYS = 120                 # Warmup days
 RETRAIN_DAYS = 15                 # Walk-forward retrain frequency
-RETRAIN_FREQUENCY_DAYS = 15       # Alias for retrain cadence
-ENABLE_PENALTY_LEARNING = True    # Adaptive error weighting
+RETRAIN_FREQUENCY_DAYS = 15
 
 # ==============================================================================
 # 5. Model Feature Columns
@@ -92,6 +92,6 @@ FEATURE_COLUMNS = list((
     "dist_sma_20", "dist_sma_50", "dist_sma_200",
     "dist_high_20d", "consecutive_up_days", "gap_pct",
 
-    # First-Hour Opening Range Features
+    # First-Hour Simulated Opening Range Features
     "first_hour_return", "first_hour_range", "first_hour_clv", "first_hour_vol_ratio"
 ))
