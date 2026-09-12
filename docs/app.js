@@ -16,9 +16,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadAllData();
 });
 
-// ==============================================================================
-// 1. TAB NAVIGATION
-// ==============================================================================
 function initTabs() {
   const tabs = document.querySelectorAll(".tab-btn");
   tabs.forEach(tab => {
@@ -29,27 +26,18 @@ function initTabs() {
       tab.classList.add("active");
       const targetId = tab.getAttribute("data-tab");
       const targetContent = document.getElementById(targetId);
-      if (targetContent) {
-        targetContent.classList.add("active");
-      }
+      if (targetContent) targetContent.classList.add("active");
     });
   });
 }
 
-// ==============================================================================
-// 2. MODAL CONTROLS
-// ==============================================================================
 function initModal() {
   const modal = document.getElementById("trigger-modal");
   const openBtn = document.getElementById("btn-open-modal");
   const closeBtn = document.getElementById("btn-close-modal");
 
-  if (openBtn && modal) {
-    openBtn.addEventListener("click", () => modal.classList.add("active"));
-  }
-  if (closeBtn && modal) {
-    closeBtn.addEventListener("click", () => modal.classList.remove("active"));
-  }
+  if (openBtn && modal) openBtn.addEventListener("click", () => modal.classList.add("active"));
+  if (closeBtn && modal) closeBtn.addEventListener("click", () => modal.classList.remove("active"));
   if (modal) {
     modal.addEventListener("click", (e) => {
       if (e.target === modal) modal.classList.remove("active");
@@ -57,11 +45,7 @@ function initModal() {
   }
 }
 
-// ==============================================================================
-// 3. MASTER DATA LOADING
-// ==============================================================================
 async function loadAllData() {
-  // 1. Load Live Tomorrow Picks
   try {
     const resLatest = await fetch("data/latest.json?t=" + Date.now());
     if (resLatest.ok) {
@@ -75,7 +59,6 @@ async function loadAllData() {
     showEmptyPicks("No live scan data file found. Run the master pipeline to screen tomorrow's trades.");
   }
 
-  // 2. Load Historical Archives
   try {
     const resHist = await fetch("data/history.json?t=" + Date.now());
     if (resHist.ok) {
@@ -86,7 +69,6 @@ async function loadAllData() {
     console.warn("Could not fetch data/history.json:", err);
   }
 
-  // 3. Load Pine Script
   try {
     const resPine = await fetch("strategies/breakout_surge_v6.pine?t=" + Date.now());
     if (resPine.ok) {
@@ -98,7 +80,6 @@ async function loadAllData() {
     console.warn("Could not fetch Pine script:", err);
   }
 
-  // 4. Load Walk-Forward Backtest Results
   await loadBacktestData();
 }
 
@@ -109,9 +90,6 @@ function showEmptyPicks(msg) {
   }
 }
 
-// ==============================================================================
-// 4. RENDER LIVE PREDICTIONS & SUMMARY METRICS
-// ==============================================================================
 function renderLive(data) {
   if (!data) return;
 
@@ -204,9 +182,6 @@ function renderCandidatesTable(candidates) {
   });
 }
 
-// ==============================================================================
-// 5. SEARCH & FILTERING
-// ==============================================================================
 function initSearchAndFilter() {
   const searchInput = document.getElementById("search-picks") || document.getElementById("search-input");
   const filterSelect = document.getElementById("filter-conviction") || document.getElementById("conviction-filter");
@@ -229,9 +204,6 @@ function initSearchAndFilter() {
   if (filterSelect) filterSelect.addEventListener("change", applyFilter);
 }
 
-// ==============================================================================
-// 6. HISTORICAL ARCHIVE
-// ==============================================================================
 function populateHistorySelector(hist) {
   const sel = document.getElementById("history-date-select");
   if (!sel) return;
@@ -307,9 +279,6 @@ function renderHistorySession(session) {
   });
 }
 
-// ==============================================================================
-// 7. ML DIAGNOSTICS
-// ==============================================================================
 function renderDiagnostics(data) {
   const m = data.ensemble_metrics || data.metadata || {};
   const prec = m.precision !== undefined ? (m.precision * 100).toFixed(1) + "%" : "--";
@@ -347,9 +316,6 @@ function renderDiagnostics(data) {
   });
 }
 
-// ==============================================================================
-// 8. WALK-FORWARD BACKTEST DATA LOADER
-// ==============================================================================
 async function loadBacktestData() {
   try {
     const resSummary = await fetch("data/backtest_summary.json?t=" + Date.now());
@@ -398,12 +364,13 @@ function renderBacktestTrades(trades) {
   trades.slice(0, 300).forEach(t => {
     const tr = document.createElement("tr");
     const pnlColor = t.net_pnl >= 0 ? "var(--accent-green)" : "var(--accent-red)";
-    const outlay = t.total_outlay_with_fees || ((t.open_entry * t.qty) + t.charges);
+    const entry = t.entry_price || t.open_entry;
+    const outlay = t.total_outlay_with_fees || ((entry * t.qty) + t.charges);
     tr.innerHTML = `
       <td>${t.date}</td>
       <td><strong>${t.symbol}</strong></td>
       <td>${t.surge_prob}%</td>
-      <td>₹${Number(t.open_entry).toFixed(2)}</td>
+      <td>₹${Number(entry).toFixed(2)}</td>
       <td>${t.qty}</td>
       <td style="font-weight:600; color:var(--text-main);">₹${Number(outlay).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
       <td>₹${Number(t.exit_price).toFixed(2)}</td>
@@ -417,9 +384,6 @@ function renderBacktestTrades(trades) {
   });
 }
 
-// ==============================================================================
-// 9. CLIENT-SIDE EXPORTS
-// ==============================================================================
 function initExportButtons() {
   const btnCsv = document.getElementById("btn-export-csv");
   if (btnCsv) {
