@@ -77,6 +77,7 @@ body {
   align-items: center;
   gap: 8px;
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .btn-trigger:hover {
@@ -362,7 +363,7 @@ tr:hover td {
       <p>Automated Machine Learning Pipeline Targeting Tomorrow's &gt;5% to 20% Surges</p>
     </div>
     <div class="header-actions">
-      <button class="btn-trigger" id="btn-open-modal">&#9654; Run Scanner Directly</button>
+      <button class="btn-trigger" id="btn-open-modal">&#9654; Run Pipeline Directly</button>
       <span class="status-badge"><span class="status-dot"></span> ACTIVE & RUNNING</span>
     </div>
   </header>
@@ -395,7 +396,7 @@ tr:hover td {
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
       <button class="tab-btn active" data-tab="tab-picks">Tomorrow's Trades</button>
-      <button class="tab-btn" data-tab="tab-history">Historical Archive (Manual Backtesting)</button>
+      <button class="tab-btn" data-tab="tab-history">Historical Archive</button>
       <button class="tab-btn" data-tab="tab-diagnostics">ML Diagnostics & Models</button>
       <button class="tab-btn" data-tab="tab-backtest">📊 Backtest & Paytm P/L</button>
       <button class="tab-btn" data-tab="tab-pine">TradingView Pine v6 Script</button>
@@ -508,11 +509,11 @@ tr:hover td {
       </div>
     </div>
 
-    <!-- TAB 5: Strategy Backtest & Paytm P/L -->
+    <!-- TAB 4: Strategy Backtest & Paytm P/L -->
     <div id="tab-backtest" class="tab-content">
       <div class="controls-bar">
         <div style="color:var(--text-muted); font-size:14px;">
-          <strong>Walk-Forward Backtest Engine</strong> | Initial Capital: <strong>₹1,00,000</strong> | Max / Trade: <strong>₹20,000 (Incl. Fees)</strong> | Capped Target: <strong>+5%</strong> | Dynamic ATR SL
+          <strong>Adaptive Walk-Forward Backtest</strong> | Capital: <strong>₹1,00,000</strong> | Max / Trade: <strong>₹20,000 (Incl. Fees)</strong> | Capped Target: <strong>+5%</strong> | Error Penalty Feedback: <strong>ACTIVE</strong>
         </div>
         <div class="export-group">
           <a href="../backtest_trade_log.csv" download class="btn-export" id="btn-dl-trades">📥 Download Trade Log CSV</a>
@@ -549,7 +550,7 @@ tr:hover td {
         </div>
       </div>
 
-      <h3 style="margin: 20px 0 12px 0; font-size: 18px;">Executed Intraday Trades Log (Top 5 Stocks / Day)</h3>
+      <h3 style="margin: 20px 0 12px 0; font-size: 18px;">Executed Intraday Trades Log (Selective Quality Gate &ge;65%)</h3>
       <div class="table-wrapper">
         <table>
           <thead>
@@ -569,13 +570,13 @@ tr:hover td {
             </tr>
           </thead>
           <tbody id="backtest-trades-body">
-            <tr><td colspan="12" style="text-align:center; padding:20px; color:var(--text-muted);">Run the backtest workflow to populate historical trade logs.</td></tr>
+            <tr><td colspan="12" style="text-align:center; padding:20px; color:var(--text-muted);">Run the pipeline workflow with backtesting enabled to populate historical trade logs.</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- TAB 4: TradingView Pine Script v6 -->
+    <!-- TAB 5: TradingView Pine Script v6 -->
     <div id="tab-pine" class="tab-content">
       <div class="controls-bar">
         <p style="color:var(--text-muted); font-size:14px;">
@@ -590,23 +591,23 @@ tr:hover td {
   <!-- Manual Trigger Modal -->
   <div class="modal" id="trigger-modal">
     <div class="modal-content">
-      <h3 style="margin-bottom: 12px; font-size: 18px;">Trigger GitHub Actions Workflow</h3>
+      <h3 style="margin-bottom: 12px; font-size: 18px;">Unified Master Pipeline Control</h3>
       <p style="color:var(--text-muted); font-size: 14px; margin-bottom: 16px;">
-        To execute an immediate scan or walk-forward backtest across NSE stocks:
+        Trigger the master engine to train models, screen tomorrow's breakout candidates, and run adaptive backtests:
       </p>
       <ol style="color:var(--text-muted); font-size: 14px; margin-left: 20px; margin-bottom: 20px;">
         <li style="margin-bottom:8px;">Open your repository's <strong>Actions</strong> tab.</li>
-        <li style="margin-bottom:8px;">Select <strong>NSE Stock Surge Scanner</strong> or <strong>NSE Strategy Walk-Forward Backtester</strong>.</li>
-        <li style="margin-bottom:8px;">Click <strong>Run workflow</strong> on the right.</li>
+        <li style="margin-bottom:8px;">Select <strong>NSE Breakout ML Master Engine</strong>.</li>
+        <li style="margin-bottom:8px;">Choose what to execute (Training / Tomorrow Picks / Backtesting).</li>
+        <li style="margin-bottom:8px;">Click <strong>Run workflow</strong>.</li>
       </ol>
       <div style="display: flex; gap: 12px; justify-content: flex-end;">
         <button class="btn-export" id="btn-close-modal">Close</button>
-        <a href="https://github.com/vishnuvcr/market-gainer-predictor-specificity-precision-prioritised/actions" target="_blank" class="btn-trigger" style="text-decoration: none;">Open GitHub Actions &rarr;</a>
+        <a href="https://github.com/vishnuvcr/market-gainer-predictor-specificity-precision-prioritised/actions" target="_blank" class="btn-trigger">Open GitHub Actions &rarr;</a>
       </div>
     </div>
   </div>
 
   <script src="app.js"></script>
 </body>
-  </html>
-          
+</html>
