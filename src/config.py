@@ -59,6 +59,7 @@ TARGET_1_PCT = 0.05               # +5.0% target 1
 TARGET_2_PCT = 0.10               # +10.0% target 2
 TARGET_3_PCT = 0.18               # +18.0% upper circuit target
 MAX_TARGET_PCT = 0.08             # +8.0% upper bound target
+TARGET_CAP_PCT = 0.05             # Profit target cap
 
 # Stop Loss Bounds & Rules
 MIN_SL_PCT = 0.015                # 1.5% minimum stop loss bound
@@ -73,25 +74,49 @@ TOP_K = 5                         # Top K setups
 WARMUP_DAYS = 120                 # Warmup days
 RETRAIN_DAYS = 15                 # Walk-forward retrain frequency
 RETRAIN_FREQUENCY_DAYS = 15
+ENABLE_PENALTY_LEARNING = True    # Adaptive error weighting
 
 # ==============================================================================
-# 5. Model Feature Columns
+# 5. Model Feature Columns (Exactly 28 features computed in feature_engineering.py)
 # ==============================================================================
 FEATURE_COLUMNS = list((
-    # Price Momentum & Returns
-    "return_1d", "return_3d", "return_5d", "return_10d", "return_20d",
-    "vol_surge_20", "vol_surge_5", "turnover_surge",
+    # 1. Price Momentum & Returns
+    "return_1d",
+    "return_3d",
+    "return_5d",
+    "return_10d",
+    "return_20d",
     
-    # Oscillators & Volatility
-    "rsi_14", "rsi_7", "rsi_slope_3",
-    "atr_pct_14", "candle_range_pct", "body_to_range", "clv",
-    "upper_shadow_pct", "lower_shadow_pct",
+    # 2. Volume & Turnover
+    "vol_surge_20",
+    "vol_surge_5",
+    "turnover_surge",
     
-    # Moving Averages & Bands
-    "bb_width_20", "bb_pos_20",
-    "dist_sma_20", "dist_sma_50", "dist_sma_200",
-    "dist_high_20d", "consecutive_up_days", "gap_pct",
-
-    # First-Hour Simulated Opening Range Features
-    "first_hour_return", "first_hour_range", "first_hour_clv", "first_hour_vol_ratio"
+    # 3. RSI
+    "rsi_14",
+    "rsi_7",
+    "rsi_slope_3",
+    
+    # 4. Volatility & Candle Morphology
+    "atr_pct_14",
+    "candle_range_pct",
+    "body_to_range",
+    "clv",
+    "upper_shadow_pct",
+    "lower_shadow_pct",
+    
+    # 5. Bollinger Bands & Moving Averages
+    "bb_width_20",
+    "bb_pos_20",
+    "dist_sma_20",
+    "dist_sma_50",
+    "dist_sma_200",
+    "dist_high_20d",
+    "gap_pct",
+    
+    # 6. First-Hour Opening Range Simulated Indicators
+    "first_hour_return",
+    "first_hour_range",
+    "first_hour_clv",
+    "first_hour_vol_ratio",
 ))
