@@ -14,7 +14,6 @@ DOCS_DIR = BASE_DIR / "docs"
 DATA_DIR = DOCS_DIR / "data"
 STRATEGIES_DIR = BASE_DIR / "strategies"
 
-# Ensure output directories exist
 for directory in [DATA_DIR, STRATEGIES_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
 
@@ -54,19 +53,21 @@ INITIAL_CAPITAL = 100000.0        # ₹1,00,000 default capital
 MAX_CAPITAL_PER_TRADE = 20000.0   # ₹20,000 max outlay per trade
 MIN_CONFIDENCE_THRESHOLD = 0.65   # 65% minimum prediction probability
 
-# Targets (supports both MIN_TARGET_PCT and TARGET_1_PCT references)
-MIN_TARGET_PCT = 0.05             # +5% minimum profit objective
-TARGET_1_PCT = 0.05               # +5% first profit objective
-TARGET_2_PCT = 0.10               # +10% runner objective
-TARGET_3_PCT = 0.18               # +18% upper circuit objective
+# Targets
+MIN_TARGET_PCT = 0.05             # Minimum target objective (+5%)
+TARGET_1_PCT = 0.05               # +5% first target
+TARGET_2_PCT = 0.10               # +10% second target
+TARGET_3_PCT = 0.18               # +18% circuit target
+MAX_TARGET_PCT = 0.18             # Upper bound target objective
 TARGET_CAP_PCT = 0.05             # Profit target cap
 
-# Stop loss and trailing rules
+# Stop Loss Bounds & Rules
+MIN_SL_PCT = 0.01                 # 1% minimum stop loss floor
+MAX_SL_PCT = 0.04                 # 4% maximum hard stop loss cap
 ATR_SL_MULTIPLIER = 1.5           # Stop loss = 1.5 * ATR(14)
-MAX_SL_PCT = 0.04                 # 4% maximum hard stop loss
 BREAKEVEN_TRIGGER_PCT = 0.025      # Move SL to entry at +2.5% surge
 
-# Backtester execution defaults
+# Backtester Execution Defaults
 TOP_K = 5                         # Max 5 positions per day
 WARMUP_DAYS = 120                 # Warmup trading days
 RETRAIN_DAYS = 15                 # Walk-forward retrain frequency
@@ -91,6 +92,6 @@ FEATURE_COLUMNS = list((
     "dist_sma_20", "dist_sma_50", "dist_sma_200",
     "dist_high_20d", "consecutive_up_days", "gap_pct",
 
-    # First-Hour Simulated Opening Range Features
+    # First-Hour Opening Range Features
     "first_hour_return", "first_hour_range", "first_hour_clv", "first_hour_vol_ratio"
 ))
