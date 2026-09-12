@@ -1,0 +1,120 @@
+name: NSE Breakout ML Master Engine
+
+on:
+  schedule:
+    - cron: '0 12 * * 1-5' # 5:30 PM IST Mon-Fri (Post NSE Market Close)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Pipeline Execution Mode'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - 'full'
+          - 'screen_only'
+          - 'backtest_only'
+          - 'train_only'
+      initial_capital:
+        description: 'Initial Capital in INR (default: 100000 = 1 Lakh)'
+        required: false
+        default: '100000'
+      max_capital_per_trade:
+        description: 'Max Capital per Trade including fees (default: 20000)'
+        required: false
+        default: '20000'
+      min_confidence:
+        description: 'Min Probability Gate to enter trade (e.g. 0.65 = 65%)'
+        required: false
+        default: '0.65'
+      retrain_days:
+        description: 'Walk-forward retrain cadence in trading days (default: 15)'
+        required: false
+        default: '15'
+      limit_tickers:
+        description: 'Limit Tickers (e.g. 100 for fast 2-min run, blank for full universe)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'master-pipeline'
+  cancel-in-progress: false
+
+jobs:
+  run-pipeline:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute Master ML Engine
+        run: |
+          MODE="${{ github.event.inputs.mode || 'full' }}"
+          CAPITAL="${{ github.event.inputs.initial_capital || '100000' }}"
+          MAX_TRADE="${{ github.event.inputs.max_capital_per_trade || '20000' }}"
+          CONF="${{ github.event.inputs.min_confidence || '0.65' }}"
+          RETRAIN="${{ github.event.inputs.retrain_days || '15' }}"
+          
+          CMD="python -u main.py --mode $MODE --capital $CAPITAL --max-per-trade $MAX_TRADE --min-confidence $CONF --retrain-days $RETRAIN"
+          
+          if [ -n "${{ github.event.inputs.limit_tickers }}" ]; then
+            CMD="$CMD --limit ${{ github.event.inputs.limit_tickers }}"
+          fi
+          
+          echo "Executing Command: $CMD"
+          eval $CMD
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nse-ml-data-and-reports
+          path: |
+            docs/data/
+            backtest_trade_log.csv
+            backtest_daily_pnl.csv
+            strategies/
+
+      - name: Commit and Push Results
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/ strategies/ backtest_trade_log.csv backtest_daily_pnl.csv
+          if git diff --staged --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Auto: Update NSE Surge Predictions & Backtest [$(date -u +'%Y-%m-%d %H:%M UTC')]"
+            git push
+          fi
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
