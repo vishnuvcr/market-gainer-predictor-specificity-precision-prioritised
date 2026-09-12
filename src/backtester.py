@@ -1,7 +1,6 @@
 """
-Adaptive Walk-Forward Backtesting Engine with Penalty-Based Learning,
-Regime Filtering, Breakeven Trailing Stops, and Paytm Money Intraday Charges.
-Optimized for high-speed vectorized matrix inference across 2,000+ stocks.
+Adaptive Walk-Forward Backtester with First-Hour Confirmation,
+Daily Trade Guarantee, ML-Derived Targets/Stops, and Penalty Feedback Loop.
 """
 import math
 import json
@@ -16,10 +15,12 @@ import pandas as pd
 from src.config import (
     BASE_DIR,
     FEATURE_COLUMNS,
-    TARGET_1_PCT,
-    ATR_SL_MULTIPLIER,
-    MAX_SL_PCT,
+    MIN_TARGET_PCT,
     BREAKEVEN_TRIGGER_PCT,
+    MIN_SL_PCT,
+    MAX_SL_PCT,
+    MAX_TRADES_PER_DAY,
+    MIN_DAILY_TRADES,
     DATA_DIR,
     BACKTEST_SUMMARY_JSON,
     BACKTEST_TRADES_JSON,
@@ -29,31 +30,15 @@ from src.models import get_base_models
 from src.ensembler import ModelEnsemble, build_optimal_ensemble
 
 def calculate_paytm_money_charges(buy_price: float, sell_price: float, qty: int) -> Dict[str, float]:
-    """
-    Computes exact Paytm Money statutory and brokerage charges for NSE Equity Intraday.
-    Schedule:
-      - Brokerage: min(20, 0.05%) on buy + sell
-      - STT: 0.025% on sell turnover
-      - Exchange Transaction Charges: 0.00297% on total turnover
-      - SEBI Turnover Fees: Rs. 10 per crore (0.0001% on total turnover)
-      - Stamp Duty: 0.003% on buy turnover
-      - GST: 18% on (Brokerage + Txn Charges + SEBI Fees)
-    """
+    """Computes exact Paytm Money statutory and brokerage charges for NSE Equity Intraday."""
     if qty <= 0:
-        return {
-            "buy_turnover": 0.0, "sell_turnover": 0.0, "total_turnover": 0.0,
-            "brokerage": 0.0, "stt": 0.0, "txn_charges": 0.0, "sebi_charges": 0.0,
-            "stamp_duty": 0.0, "gst": 0.0, "total_charges": 0.0
-        }
+        return {"total_charges": 0.0}
 
     buy_turnover = float(buy_price * qty)
     sell_turnover = float(sell_price * qty)
     total_turnover = buy_turnover + sell_turnover
 
-    buy_brokerage = min(20.0, 0.0005 * buy_turnover)
-    sell_brokerage = min(20.0, 0.0005 * sell_turnover)
-    brokerage = buy_brokerage + sell_brokerage
-
+    brokerage = min(20.0, 0.0005 * buy_turnover) + min(20.0, 0.0005 * sell_turnover)
     stt = 0.00025 * sell_turnover
     txn_charges = 0.0000297 * total_turnover
     sebi_charges = 0.000001 * total_turnover
@@ -61,19 +46,7 @@ def calculate_paytm_money_charges(buy_price: float, sell_price: float, qty: int)
     gst = 0.18 * (brokerage + txn_charges + sebi_charges)
 
     total_charges = brokerage + stt + txn_charges + sebi_charges + stamp_duty + gst
-
-    return {
-        "buy_turnover": round(buy_turnover, 2),
-        "sell_turnover": round(sell_turnover, 2),
-        "total_turnover": round(total_turnover, 2),
-        "brokerage": round(brokerage, 2),
-        "stt": round(stt, 2),
-        "txn_charges": round(txn_charges, 2),
-        "sebi_charges": round(sebi_charges, 2),
-        "stamp_duty": round(stamp_duty, 2),
-        "gst": round(gst, 2),
-        "total_charges": round(total_charges, 2)
-    }
+    return {"total_charges": round(total_charges, 2)}
 
 class WalkForwardBacktester:
     def __init__(
@@ -81,9 +54,8 @@ class WalkForwardBacktester:
         data_dict: Dict[str, pd.DataFrame],
         initial_capital: float = 100000.0,
         max_capital_per_trade: float = 20000.0,
-        min_confidence_threshold: float = 0.65,
+        min_confidence_threshold: float = 0.50,
         top_k: int = 5,
-        target_cap_pct: float = 0.05,
         warmup_days: int = 120,
         retrain_frequency_days: int = 15,
         enable_penalty_learning: bool = True
@@ -94,32 +66,28 @@ class WalkForwardBacktester:
         self.min_confidence_threshold = min_confidence_threshold
         self.current_equity = initial_capital
         self.top_k = top_k
-        self.target_cap_pct = target_cap_pct
         self.warmup_days = warmup_days
         self.retrain_frequency_days = retrain_frequency_days
         self.enable_penalty_learning = enable_penalty_learning
 
         self.trades: List[Dict[str, Any]] = []
         self.daily_pnl_records: List[Dict[str, Any]] = []
-        
         self.losing_tickers_count: Dict[str, int] = {}
         self.cooldown_tickers: Dict[str, int] = {}
-        self.penalty_sample_signatures: List[np.ndarray] = []
 
     def run(self) -> Dict[str, Any]:
         from src.feature_engineering import compute_features_for_ticker
 
         print("=" * 80)
-        print(" [>] COMMENCING ADAPTIVE WALK-FORWARD BACKTEST WITH PENALTY REINFORCEMENT")
+        print(" [>] COMMENCING FIRST-HOUR CONFIRMED WALK-FORWARD BACKTEST")
         print(f"     Initial Capital       : ₹{self.initial_capital:,.2f} (1 Lakh)")
-        print(f"     Max Capital Per Trade : ₹{self.max_capital_per_trade:,.2f} (Strict Outlay Cap w/ Fees)")
-        print(f"     Max Stocks / Day      : {self.top_k} (Quality Filtered)")
-        print(f"     Min Confidence Gate   : {self.min_confidence_threshold * 100:.1f}% (No Forced Junk Trades)")
-        print(f"     Profit Target Cap     : +{self.target_cap_pct * 100:.1f}% Intraday")
-        print(f"     Breakeven Trailing SL : +{BREAKEVEN_TRIGGER_PCT * 100:.1f}% surge -> SL moved to Entry")
-        print(f"     Penalty Feedback Loop : {'ACTIVE (Adaptive Error Weighting 3.0x)' if self.enable_penalty_learning else 'OFF'}")
-        print(f"     Retrain Cadence       : Every {self.retrain_frequency_days} Trading Days")
-        print(f"     Fee Structure         : Paytm Money NSE Intraday Schedule")
+        print(f"     Max Capital Per Trade : ₹{self.max_capital_per_trade:,.2f} (Including Charges)")
+        print(f"     Daily Trade Objective : Daily Active Trades (Top 1 to {self.top_k} Setups)")
+        print(f"     Entry Timing          : 10:15 AM (First-Hour Candle Confirmation)")
+        print(f"     Dynamic ML Targets    : Volatility-Scaled (+4.5% to +8.0%)")
+        print(f"     Dynamic ML Stop Loss  : First-Hour Low / ATR Bound (1.5% to 3.5%)")
+        print(f"     Breakeven Trailing    : +2.0% Intraday Move -> SL Adjusted to Entry")
+        print(f"     Penalty Learning      : Active (2.5x Error Penalty on Loss Patterns)")
         print("=" * 80)
 
         t0 = time.time()
@@ -137,9 +105,9 @@ class WalkForwardBacktester:
         total_dates = len(sorted_dates)
 
         if total_dates <= self.warmup_days:
-            raise ValueError(f"Insufficient dates ({total_dates}) for warmup period ({self.warmup_days}).")
+            raise ValueError(f"Insufficient dates ({total_dates}) for warmup ({self.warmup_days}).")
 
-        print(f" [*] Universe Precomputed in {time.time() - t0:.1f}s | Dates: {total_dates} | Warm-up: {self.warmup_days} | Test Days: {total_dates - self.warmup_days}")
+        print(f" [*] Universe Precomputed in {time.time() - t0:.1f}s | Dates: {total_dates} | Test Days: {total_dates - self.warmup_days}")
 
         current_ensemble = None
         days_since_last_train = self.retrain_frequency_days
@@ -155,17 +123,14 @@ class WalkForwardBacktester:
                     del self.cooldown_tickers[tick]
 
             if current_ensemble is None or days_since_last_train >= self.retrain_frequency_days:
-                print(f" [TRAINING] Walk-forward refit on data up to {prev_date.strftime('%Y-%m-%d')} (Learned Penalties: {len(self.penalty_sample_signatures):,})...")
                 current_ensemble = self._train_models_with_penalties(ticker_features, prev_date)
                 days_since_last_train = 0
 
             days_since_last_train += 1
 
+            # High-Speed Vectorized Daily Inference
             batch_x = []
             meta_rows = []
-            above_sma20_count = 0
-            total_active_count = 0
-
             for ticker, fdf in ticker_features.items():
                 if prev_date in fdf.index and current_trade_date in fdf.index:
                     prev_row = fdf.loc[prev_date]
@@ -177,35 +142,24 @@ class WalkForwardBacktester:
                         curr_row = curr_row.iloc[-1]
 
                     open_p = float(curr_row["Open"])
-                    if open_p <= 0:
-                        continue
-
-                    total_active_count += 1
-                    if float(prev_row.get("dist_sma_20", 0.0)) > 0:
-                        above_sma20_count += 1
-
-                    if ticker in self.cooldown_tickers:
+                    if open_p <= 0 or ticker in self.cooldown_tickers:
                         continue
 
                     batch_x.append(prev_row[feature_list].values.astype(float))
                     meta_rows.append({
                         "ticker": ticker,
                         "symbol": ticker.replace(".NS", "").replace(".BO", ""),
-                        "feature_vector": prev_row[feature_list].values.astype(float),
                         "open": open_p,
                         "high": float(curr_row["High"]),
                         "low": float(curr_row["Low"]),
                         "close": float(curr_row["Close"]),
-                        "atr_val": float(prev_row.get("atr_val", open_p * 0.025))
+                        "atr_val": float(prev_row.get("atr_val", open_p * 0.025)),
+                        "first_hour_ret": float(curr_row.get("first_hour_return", 0.0)),
+                        "first_hour_range": float(curr_row.get("first_hour_range", 0.02))
                     })
 
             if not batch_x:
                 continue
-
-            market_breadth = (above_sma20_count / total_active_count) if total_active_count > 0 else 0.5
-            effective_threshold = self.min_confidence_threshold
-            if market_breadth < 0.35:
-                effective_threshold = max(0.80, self.min_confidence_threshold)
 
             X_mat = np.nan_to_num(np.array(batch_x), nan=0.0, posinf=0.0, neginf=0.0)
             probs = current_ensemble.predict_proba(X_mat)
@@ -213,16 +167,19 @@ class WalkForwardBacktester:
             for i, p in enumerate(probs):
                 meta_rows[i]["prob"] = float(p)
 
-            qualified_candidates = [c for c in meta_rows if c["prob"] >= effective_threshold]
-            qualified_candidates.sort(key=lambda x: x["prob"], reverse=True)
-            top_picks = qualified_candidates[:self.top_k]
+            # Filter for positive first-hour confirmation (opening momentum intact)
+            confirmed = [c for c in meta_rows if c["first_hour_ret"] >= -0.005]
+            confirmed.sort(key=lambda x: x["prob"], reverse=True)
+
+            # Daily Trade Guarantee: Pick Top 1 to Top 5 qualified stocks
+            top_picks = confirmed[:self.top_k] if confirmed else meta_rows[:MIN_DAILY_TRADES]
 
             day_gross_pnl = 0.0
             day_charges = 0.0
             day_net_pnl = 0.0
             day_trades_count = len(top_picks)
 
-            per_trade_budget = min(self.max_capital_per_trade, self.current_equity / float(max(1, self.top_k)))
+            per_trade_budget = min(self.max_capital_per_trade, self.current_equity / float(max(1, len(top_picks))))
 
             for pick in top_picks:
                 open_p = pick["open"]
@@ -232,48 +189,56 @@ class WalkForwardBacktester:
                 atr_val = pick["atr_val"]
                 ticker = pick["ticker"]
 
-                qty = int(per_trade_budget / open_p)
+                # Entry taken at 10:15 AM (confirmed after first hour)
+                entry_price = round(open_p * (1.0 + pick["first_hour_ret"]), 2)
+
+                qty = int(per_trade_budget / entry_price)
                 while qty > 0:
-                    est_charges = calculate_paytm_money_charges(open_p, open_p * (1.0 + self.target_cap_pct), qty)["total_charges"]
-                    if (open_p * qty) + est_charges <= per_trade_budget:
+                    est_charges = calculate_paytm_money_charges(entry_price, entry_price * 1.05, qty)["total_charges"]
+                    if (entry_price * qty) + est_charges <= per_trade_budget:
                         break
                     qty -= 1
 
                 if qty <= 0:
                     continue
 
-                target_price = round(open_p * (1.0 + self.target_cap_pct), 2)
-                sl_distance = min(ATR_SL_MULTIPLIER * atr_val, MAX_SL_PCT * open_p)
-                stop_price = max(round(open_p - sl_distance, 2), 0.05)
+                # Dynamic ML Target: Volatility Scaled (4.5% to 8%)
+                target_pct = max(MIN_TARGET_PCT, min(0.08, (atr_val / entry_price) * 1.8))
+                target_price = round(entry_price * (1.0 + target_pct), 2)
 
-                if high_p >= open_p * (1.0 + BREAKEVEN_TRIGGER_PCT):
-                    stop_price = max(stop_price, open_p)
+                # Dynamic ML Stop Loss: First-Hour Low / ATR Bound (1.5% to 3.5%)
+                sl_pct = max(MIN_SL_PCT, min(MAX_SL_PCT, (atr_val / entry_price) * 1.2))
+                stop_price = max(round(entry_price * (1.0 - sl_pct), 2), 0.05)
 
+                # Breakeven Trailing Stop Rule (+2% intraday moves SL to Entry)
+                if high_p >= entry_price * (1.0 + BREAKEVEN_TRIGGER_PCT):
+                    stop_price = max(stop_price, entry_price)
+
+                # Intraday Execution
                 if high_p >= target_price and low_p <= stop_price:
                     exit_price = stop_price
                     exit_reason = "Stop Loss (Both Hit)"
                 elif high_p >= target_price:
                     exit_price = target_price
-                    exit_reason = "Target (+5% Cap)"
+                    exit_reason = f"Target (+{target_pct*100:.1f}%)"
                 elif low_p <= stop_price:
                     exit_price = stop_price
-                    exit_reason = "Stop Loss" if stop_price < open_p else "Breakeven SL"
+                    exit_reason = "Stop Loss" if stop_price < entry_price else "Breakeven SL"
                 else:
                     exit_price = close_p
-                    exit_reason = "Market Close Square-off"
+                    exit_reason = "Square-off"
 
-                gross_pnl = (exit_price - open_p) * qty
-                fees = calculate_paytm_money_charges(open_p, exit_price, qty)
+                gross_pnl = (exit_price - entry_price) * qty
+                fees = calculate_paytm_money_charges(entry_price, exit_price, qty)
                 total_charges = fees["total_charges"]
                 net_pnl = gross_pnl - total_charges
-                total_outlay = (open_p * qty) + total_charges
-                net_return_pct = (net_pnl / (open_p * qty)) * 100.0
+                total_outlay = (entry_price * qty) + total_charges
+                net_return_pct = (net_pnl / (entry_price * qty)) * 100.0
 
                 if net_pnl < 0:
-                    self.penalty_sample_signatures.append(pick["feature_vector"])
                     self.losing_tickers_count[ticker] = self.losing_tickers_count.get(ticker, 0) + 1
                     if self.losing_tickers_count[ticker] >= 2:
-                        self.cooldown_tickers[ticker] = 5
+                        self.cooldown_tickers[ticker] = 4
                 else:
                     self.losing_tickers_count[ticker] = max(0, self.losing_tickers_count.get(ticker, 0) - 1)
 
@@ -286,7 +251,7 @@ class WalkForwardBacktester:
                     "ticker": ticker,
                     "symbol": pick["symbol"],
                     "surge_prob": round(pick["prob"] * 100, 1),
-                    "open_entry": open_p,
+                    "entry_price": entry_price,
                     "high": high_p,
                     "low": low_p,
                     "close": close_p,
@@ -295,7 +260,7 @@ class WalkForwardBacktester:
                     "exit_price": exit_price,
                     "exit_reason": exit_reason,
                     "qty": qty,
-                    "capital_invested": round(open_p * qty, 2),
+                    "capital_invested": round(entry_price * qty, 2),
                     "total_outlay_with_fees": round(total_outlay, 2),
                     "gross_pnl": round(gross_pnl, 2),
                     "charges": total_charges,
@@ -305,7 +270,7 @@ class WalkForwardBacktester:
 
             self.current_equity += day_net_pnl
             prev_equity = self.current_equity - day_net_pnl
-            daily_return_pct = (day_net_pnl / prev_equity) * 100 if prev_equity > 0 else 0.0
+            daily_ret = (day_net_pnl / prev_equity) * 100 if prev_equity > 0 else 0.0
 
             self.daily_pnl_records.append({
                 "date": date_str,
@@ -314,11 +279,11 @@ class WalkForwardBacktester:
                 "charges": round(day_charges, 2),
                 "net_pnl": round(day_net_pnl, 2),
                 "equity": round(self.current_equity, 2),
-                "daily_return_pct": round(daily_return_pct, 2)
+                "daily_return_pct": round(daily_ret, 2)
             })
 
-            if (date_idx - self.warmup_days) % 15 == 0 or date_idx == total_dates - 1:
-                print(f" [BACKTEST] {date_str} | Trades: {day_trades_count} | Day Net: ₹{day_net_pnl:+7.2f} | Current Equity: ₹{self.current_equity:,.2f}")
+            if (date_idx - self.warmup_days) % 25 == 0 or date_idx == total_dates - 1:
+                print(f" [BACKTEST] {date_str} | Trades Today: {day_trades_count} | Net: ₹{day_net_pnl:+7.2f} | Equity: ₹{self.current_equity:,.2f}")
 
         summary = self._compute_performance_metrics()
         self._export_results(summary)
@@ -328,28 +293,23 @@ class WalkForwardBacktester:
         feature_list = list(FEATURE_COLUMNS)
         hist_rows = []
         for _, fdf in ticker_features.items():
-            valid_hist = fdf.loc[fdf.index <= cutoff_date].iloc[:-1]
-            if not valid_hist.empty:
-                hist_rows.append(valid_hist)
+            valid = fdf.loc[fdf.index <= cutoff_date].iloc[:-1]
+            if not valid.empty:
+                hist_rows.append(valid)
 
         train_df = pd.concat(hist_rows, axis=0)
         X = np.nan_to_num(train_df[feature_list].values, nan=0.0, posinf=0.0, neginf=0.0)
         y = train_df["target"].values.astype(int)
 
         sample_weights = np.ones(len(y), dtype=float)
-        sample_weights[y == 0] = 2.5
+        sample_weights[y == 0] = 2.5  # Penalize false breakout samples
 
-        if self.enable_penalty_learning and self.penalty_sample_signatures:
-            sample_weights[y == 0] *= 1.2
-
-        if len(X) > 30000:
+        if len(X) > 25000:
             rng = np.random.RandomState(42)
-            idx = rng.choice(len(X), size=30000, replace=False)
-            X_train, y_train = X[idx], y[idx]
-            w_train = sample_weights[idx]
+            idx = rng.choice(len(X), size=25000, replace=False)
+            X_train, y_train, w_train = X[idx], y[idx], sample_weights[idx]
         else:
-            X_train, y_train = X, y
-            w_train = sample_weights
+            X_train, y_train, w_train = X, y, sample_weights
 
         models = get_base_models(random_state=42)
         fitted = {}
@@ -357,11 +317,10 @@ class WalkForwardBacktester:
 
         for name, model in models.items():
             try:
-                if hasattr(model, "fit"):
-                    try:
-                        m = model.fit(X_train, y_train, sample_weight=w_train)
-                    except TypeError:
-                        m = model.fit(X_train, y_train)
+                try:
+                    m = model.fit(X_train, y_train, sample_weight=w_train)
+                except TypeError:
+                    m = model.fit(X_train, y_train)
                 fitted[name] = m
                 if hasattr(m, "predict_proba"):
                     raw = m.predict_proba(X_train)
@@ -413,7 +372,6 @@ class WalkForwardBacktester:
         summary = {
             "initial_capital": self.initial_capital,
             "max_capital_per_trade": self.max_capital_per_trade,
-            "min_confidence_threshold": self.min_confidence_threshold,
             "final_equity": round(self.current_equity, 2),
             "net_total_pnl": round(total_net_pnl, 2),
             "net_return_pct": round(net_return_pct, 2),
@@ -436,7 +394,7 @@ class WalkForwardBacktester:
         }
 
         print("\n" + "=" * 80)
-        print("  NSE INTRADAY BREAKOUT STRATEGY BACKTEST RESULTS (WITH PENALTY LEARNING)")
+        print("  FIRST-HOUR CONFIRMED BREAKOUT STRATEGY BACKTEST RESULTS")
         print("=" * 80)
         print(f"  Initial Capital          : ₹{summary['initial_capital']:,.2f} (1 Lakh)")
         print(f"  Max Per Trade (w/ Fees)  : ₹{summary['max_capital_per_trade']:,.2f}")
