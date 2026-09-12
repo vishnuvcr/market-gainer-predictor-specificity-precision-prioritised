@@ -211,7 +211,7 @@ class WalkForwardBacktester:
                 if open_p <= 0 or per_trade_budget <= 0:
                     continue
                 
-                # Strict capital sizing: (open_p * qty) + charges <= per_trade_budget (Max ₹20,000 including charges)
+                # Sizing: (open_p * qty) + charges <= per_trade_budget (Max ₹20,000 including charges)
                 qty = int(per_trade_budget / open_p)
                 while qty > 0:
                     est_charges = calculate_paytm_money_charges(
@@ -231,6 +231,206 @@ class WalkForwardBacktester:
                 
                 # Stop Loss: 1.5 * ATR capped at max 4%
                 sl_distance = min(ATR_SL_MULTIPLIER * atr_val, MAX_SL_PCT * open_p)
+                stop_price = max(round(open_p - sl_distance, 2), 0.05)
+                
+                # Intraday Trade Resolution
+                if high_p >= target_price and low_p <= stop_price:
+                    exit_price = stop_price
+                    exit_reason = "Stop Loss (Both Hit)"
+                elif high_p >= target_price:
+                    exit_price = target_price
+                    exit_reason = "Target (+5% Cap)"
+                elif low_p <= stop_price:
+                    exit_price = stop_price
+                    exit_reason = "Stop Loss"
+                else:
+                    exit_price = close_p
+                    exit_reason = "Market Close Square-off"
+                    
+                gross_pnl = (exit_price - open_p) * qty
+                fees = calculate_paytm_money_charges(open_p, exit_price, qty)
+                total_charges = fees["total_charges"]
+                net_pnl = gross_pnl - total_charges
+                total_outlay = (open_p * qty) + total_charges
+                net_return_pct = (net_pnl / (open_p * qty)) * 100.0
+                
+                day_gross_pnl += gross_pnl
+                day_charges += total_charges
+                day_net_pnl += net_pnl
+                
+                self.trades.append({
+                    "date": date_str,
+                    "ticker": pick["ticker"],
+                    "symbol": pick["symbol"],
+                    "surge_prob": round(pick["prob"] * 100, 1),
+                    "open_entry": open_p,
+                    "high": high_p,
+                    "low": low_p,
+                    "close": close_p,
+                    "target": target_price,
+                    "stop_loss": stop_price,
+                    "exit_price": exit_price,
+                    "exit_reason": exit_reason,
+                    "qty": qty,
+                    "capital_invested": round(open_p * qty, 2),
+                    "total_outlay_with_fees": round(total_outlay, 2),
+                    "gross_pnl": round(gross_pnl, 2),
+                    "charges": total_charges,
+                    "net_pnl": round(net_pnl, 2),
+                    "net_return_pct": round(net_return_pct, 2)
+                })
+                
+            self.current_equity += day_net_pnl
+            daily_return_pct = (day_net_pnl / (self.current_equity - day_net_pnl)) * 100 if (self.current_equity - day_net_pnl) > 0 else 0.0
+            
+            self.daily_pnl_records.append({
+                "date": date_str,
+                "trades_count": day_trades_count,
+                "gross_pnl": round(day_gross_pnl, 2),
+                "charges": round(day_charges, 2),
+                "net_pnl": round(day_net_pnl, 2),
+                "equity": round(self.current_equity, 2),
+                "daily_return_pct": round(daily_return_pct, 2)
+            })
+            
+            if (date_idx - self.warmup_days) % 15 == 0 or date_idx == total_dates - 1:
+                print(f" [BACKTEST] {date_str} | Trades: {day_trades_count} | Day Net: ₹{day_net_pnl:+7.2f} | Current Equity: ₹{self.current_equity:,.2f}")
+                
+        summary = self._compute_performance_metrics()
+        self._export_results(summary)
+        return summary
+
+    def _train_models_up_to(self, ticker_features: Dict[str, pd.DataFrame], cutoff_date) -> ModelEnsemble:
+        feature_list = list(FEATURE_COLUMNS)
+        hist_rows = []
+        for _, fdf in ticker_features.items():
+            valid_hist = fdf.loc[fdf.index <= cutoff_date].iloc[:-1]
+            if not valid_hist.empty:
+                hist_rows.append(valid_hist)
+                
+        train_df = pd.concat(hist_rows, axis=0)
+        X = np.nan_to_num(train_df[feature_list].values, nan=0.0, posinf=0.0, neginf=0.0)
+        y = train_df["target"].values.astype(int)
+        
+        if len(X) > 35000:
+            rng = np.random.RandomState(42)
+            idx = rng.choice(len(X), size=35000, replace=False)
+            X_train, y_train = X[idx], y[idx]
+        else:
+            X_train, y_train = X, y
+            
+        models = get_base_models(random_state=42)
+        fitted = {}
+        prob_df = pd.DataFrame(index=range(len(y_train)))
+        
+        for name, model in models.items():
+            try:
+                m = model.fit(X_train, y_train)
+                fitted[name] = m
+                if hasattr(m, "predict_proba"):
+                    raw = m.predict_proba(X_train)
+                    prob_df[name] = raw.take(1, axis=1) if raw.ndim == 2 else raw
+                else:
+                    prob_df[name] = m.predict(X_train)
+            except Exception:
+                continue
+                
+        return build_optimal_ensemble(fitted, prob_df, y_train)
+
+    def _compute_performance_metrics(self) -> Dict[str, Any]:
+        trade_df = pd.DataFrame(self.trades)
+        daily_df = pd.DataFrame(self.daily_pnl_records)
+        
+        total_trades = len(trade_df)
+        winning_trades = trade_df[trade_df["net_pnl"] > 0]
+        losing_trades = trade_df[trade_df["net_pnl"] < 0]
+        
+        win_count = len(winning_trades)
+        loss_count = len(losing_trades)
+        win_rate_pct = (win_count / total_trades) * 100.0 if total_trades > 0 else 0.0
+        
+        gross_profit = winning_trades["gross_pnl"].sum()
+        gross_loss = abs(losing_trades["gross_pnl"].sum())
+        profit_factor = (gross_profit / gross_loss) if gross_loss > 0 else 999.0
+        
+        total_gross_pnl = trade_df["gross_pnl"].sum()
+        total_charges = trade_df["charges"].sum()
+        total_net_pnl = trade_df["net_pnl"].sum()
+        net_return_pct = ((self.current_equity - self.initial_capital) / self.initial_capital) * 100.0
+        
+        daily_df["peak"] = daily_df["equity"].cummax()
+        daily_df["drawdown"] = daily_df["equity"] - daily_df["peak"]
+        daily_df["drawdown_pct"] = (daily_df["drawdown"] / daily_df["peak"]) * 100.0
+        
+        max_drawdown_inr = daily_df["drawdown"].min()
+        max_drawdown_pct = daily_df["drawdown_pct"].min()
+        
+        returns = daily_df["daily_return_pct"] / 100.0
+        ann_mean = returns.mean() * 252
+        ann_std = returns.std() * math.sqrt(252) if len(returns) > 1 else 1.0
+        sharpe_ratio = (ann_mean - 0.065) / (ann_std + 1e-9)
+        downside_std = returns[returns < 0].std() * math.sqrt(252) if len(returns[returns < 0]) > 1 else 1.0
+        sortino_ratio = (ann_mean - 0.065) / (downside_std + 1e-9)
+        
+        reasons = trade_df["exit_reason"].value_counts().to_dict()
+        
+        summary = {
+            "initial_capital": self.initial_capital,
+            "max_capital_per_trade": self.max_capital_per_trade,
+            "final_equity": round(self.current_equity, 2),
+            "net_total_pnl": round(total_net_pnl, 2),
+            "net_return_pct": round(net_return_pct, 2),
+            "total_gross_pnl": round(total_gross_pnl, 2),
+            "total_paytm_charges": round(total_charges, 2),
+            "total_trading_days": len(daily_df),
+            "total_trades": total_trades,
+            "winning_trades": win_count,
+            "losing_trades": loss_count,
+            "win_rate_pct": round(win_rate_pct, 2),
+            "profit_factor": round(profit_factor, 2),
+            "avg_win_inr": round(winning_trades["net_pnl"].mean(), 2) if win_count > 0 else 0.0,
+            "avg_loss_inr": round(losing_trades["net_pnl"].mean(), 2) if loss_count > 0 else 0.0,
+            "max_drawdown_inr": round(max_drawdown_inr, 2),
+            "max_drawdown_pct": round(max_drawdown_pct, 2),
+            "sharpe_ratio": round(sharpe_ratio, 2),
+            "sortino_ratio": round(sortino_ratio, 2),
+            "exit_reasons": reasons,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        print("\n" + "=" * 80)
+        print("  NSE INTRADAY BREAKOUT STRATEGY BACKTEST RESULTS")
+        print("=" * 80)
+        print(f"  Initial Capital          : ₹{summary['initial_capital']:,.2f} (1 Lakh)")
+        print(f"  Max Per Trade (w/ Fees)  : ₹{summary['max_capital_per_trade']:,.2f}")
+        print(f"  Final Equity             : ₹{summary['final_equity']:,.2f}")
+        print(f"  Total Net Profit (P/L)   : ₹{summary['net_total_pnl']:+,.2f} ({summary['net_return_pct']:+.2f}%)")
+        print(f"  Total Gross P/L          : ₹{summary['total_gross_pnl']:+,.2f}")
+        print(f"  Total Paytm Money Fees   : ₹{summary['total_paytm_charges']:,.2f}")
+        print(f"  Total Trading Days       : {summary['total_trading_days']}")
+        print(f"  Total Trades Executed    : {summary['total_trades']}")
+        print(f"  Winning / Losing Trades  : {summary['winning_trades']} wins / {summary['losing_trades']} losses")
+        print(f"  Win Rate                 : {summary['win_rate_pct']:.2f}%")
+        print(f"  Profit Factor            : {summary['profit_factor']:.2f}")
+        print(f"  Max Drawdown             : ₹{summary['max_drawdown_inr']:,.2f} ({summary['max_drawdown_pct']:.2f}%)")
+        print(f"  Sharpe Ratio (Ann.)      : {summary['sharpe_ratio']:.2f}")
+        print(f"  Sortino Ratio (Ann.)     : {summary['sortino_ratio']:.2f}")
+        print("=" * 80 + "\n")
+        
+        return summary
+
+    def _export_results(self, summary: Dict[str, Any]):
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        import json
+        with open(DATA_DIR / "backtest_summary.json", "w", encoding="utf-8") as f:
+            json.dump(summary, f, indent=2)
+        with open(DATA_DIR / "backtest_trades.json", "w", encoding="utf-8") as f:
+            json.dump(self.trades, f, indent=2)
+        with open(DATA_DIR / "backtest_daily.json", "w", encoding="utf-8") as f:
+            json.dump(self.daily_pnl_records, f, indent=2)
+            
+        pd.DataFrame(self.trades).to_csv(BASE_DIR / "backtest_trade_log.csv", index=False)
+        pd.DataFrame(self.daily_pnl_records).to_csv(BASE_DIR / "backtest        sl_distance = min(ATR_SL_MULTIPLIER * atr_val, MAX_SL_PCT * open_p)
                 stop_price = max(round(open_p - sl_distance, 2), 0.05)
                 
                 # Intraday Trade Resolution
