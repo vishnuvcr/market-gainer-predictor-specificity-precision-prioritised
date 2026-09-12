@@ -1,469 +1,414 @@
-const REPO_OWNER = "vishnuvcr";
-const REPO_NAME = "market-gainer-predictor-specificity-precision-prioritised";
-const WORKFLOW_ID = "daily_scanner.yml";
+/**
+ * Frontend client script for NSE Stock Surge ML Scanner
+ * Handles live predictions, historical archive, ML diagnostics, Pine script loader,
+ * walk-forward backtest results, and client-side CSV / JPG / PDF exports.
+ */
 
-let latestData = null;
-let historyData = [];
-let monitorInterval = null;
-let currentActiveRunId = null;
-let runStartTime = null;
+let currentPicks = [];
+let allHistoryData = {};
+let latestMetadata = {};
 
-document.addEventListener("DOMContentLoaded", async () => {
-  setupTabs();
-  initTokenInput();
-  await loadData();
-  checkActiveWorkflow();
-  setInterval(checkActiveWorkflow, 6000);
+document.addEventListener("DOMContentLoaded", () => {
+  initTabs();
+  initModal();
+  initSearchAndFilter();
+  initExportButtons();
+  loadData();
 });
 
-function setupTabs() {
+// ==============================================================================
+// TAB SWITCHING LOGIC
+// ==============================================================================
+function initTabs() {
   const tabs = document.querySelectorAll(".tab-btn");
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
       tabs.forEach(t => t.classList.remove("active"));
       document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
       tab.classList.add("active");
-      const target = document.getElementById(tab.dataset.tab);
-      if (target) target.classList.add("active");
+      const targetId = tab.getAttribute("data-tab");
+      const targetContent = document.getElementById(targetId);
+      if (targetContent) {
+        targetContent.classList.add("active");
+      }
     });
   });
 }
 
-function initTokenInput() {
-  const saved = localStorage.getItem("gh_pat_token");
-  if (saved) {
-    const input = document.getElementById("gh-token-input");
-    if (input) input.value = saved;
+// ==============================================================================
+// MODAL CONTROLS
+// ==============================================================================
+function initModal() {
+  const modal = document.getElementById("trigger-modal");
+  const openBtn = document.getElementById("btn-open-modal");
+  const closeBtn = document.getElementById("btn-close-modal");
+
+  if (openBtn && modal) {
+    openBtn.addEventListener("click", () => modal.classList.add("active"));
+  }
+  if (closeBtn && modal) {
+    closeBtn.addEventListener("click", () => modal.classList.remove("active"));
+  }
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.remove("active");
+    });
   }
 }
 
+// ==============================================================================
+// DATA FETCHING AND RENDERING
+// ==============================================================================
 async function loadData() {
   try {
     const resLatest = await fetch("data/latest.json?t=" + Date.now());
     if (resLatest.ok) {
-      latestData = await resLatest.json();
-      renderLive(latestData);
+      const data = await resLatest.json();
+      latestMetadata = data.metadata || {};
+      currentPicks = data.picks || [];
+      renderTopCards(latestMetadata, currentPicks);
+      renderPicksTable(currentPicks);
+      renderDiagnostics(latestMetadata);
     }
   } catch (err) {
-    console.warn("Could not fetch latest.json:", err);
+    console.warn("Could not load data/latest.json:", err);
   }
 
   try {
-    const resHist = await fetch("data/history.json?t=" + Date.now());
-    if (resHist.ok) {
-      historyData = await resHist.json();
-      populateHistorySelector(historyData);
+    const resHistory = await fetch("data/history.json?t=" + Date.now());
+    if (resHistory.ok) {
+      allHistoryData = await resHistory.json();
+      populateHistoryDropdown(allHistoryData);
     }
   } catch (err) {
-    console.warn("Could not fetch history.json:", err);
+    console.warn("Could not load data/history.json:", err);
   }
-}
 
-function renderLive(data) {
-  if (!data) return;
-  document.getElementById("stat-time").textContent = data.timestamp || "--";
-  document.getElementById("stat-scanned").textContent = data.total_tickers_scanned || "--";
-  document.getElementById("stat-conviction").textContent = data.high_conviction_count || "0";
-  
-  const m = data.ensemble_metrics || {};
-  document.getElementById("stat-auc").textContent = m.ensemble_auc ? (m.ensemble_auc * 100).toFixed(1) + "%" : "--";
-  document.getElementById("stat-spec").textContent = m.specificity ? (m.specificity * 100).toFixed(1) + "%" : "--";
-  
-  renderTable("live-picks-body", data.candidates || []);
-  renderDiagnostics(data);
-}
-
-function renderTable(tbodyId, candidates) {
-  const tbody = document.getElementById(tbodyId);
-  tbody.innerHTML = "";
-  
-  if (!candidates || candidates.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 24px; color:#94a3b8;">No picks matching criteria found.</td></tr>';
-    return;
+  try {
+    const resPine = await fetch("strategies/breakout_surge_v6.pine?t=" + Date.now());
+    if (resPine.ok) {
+      const pineCode = await resPine.text();
+      const codeEl = document.getElementById("pine-code-container");
+      if (codeEl) codeEl.textContent = pineCode;
+    }
+  } catch (err) {
+    console.warn("Could not load Pine script:", err);
   }
+
+  // Load Walk-Forward Backtest Results
+  await loadBacktestData();
+}
+
+function renderTopCards(meta, picks) {
+  document.getElementById("stat-last-run").textContent = meta.pipeline_run_timestamp || "Just Now";
+  document.getElementById("stat-scanned-count").textContent = meta.total_stocks_analyzed || "2,500+";
   
-  candidates.forEach(c => {
-    const tr = document.createElement("tr");
-    const tvSymbol = "NSE:" + c.symbol;
-    const tvUrl = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(tvSymbol);
-    
-    tr.innerHTML = `
-      <td><a href="${tvUrl}" target="_blank" class="tv-link">${c.symbol} ↗</a></td>
-      <td><span class="badge ${c.badge_class}">${c.conviction}</span></td>
-      <td><strong>${(c.probability * 100).toFixed(1)}%</strong></td>
-      <td>₹${c.close.toFixed(2)}</td>
-      <td style="color:#ef4444;">₹${c.stop_loss.toFixed(2)} (${c.stop_loss_pct}%)</td>
-      <td style="color:#10b981; font-weight:600;">₹${c.target_1.toFixed(2)} (+5%)</td>
-      <td style="color:#0ea5e9;">₹${c.target_2.toFixed(2)} (+10%)</td>
-      <td style="color:#8b5cf6;">₹${c.target_3.toFixed(2)} (+18%)</td>
-      <td><strong>${c.risk_reward.toFixed(2)}:1</strong></td>
-      <td>${(c.catalysts || []).map(t => `<span class="tag">${t}</span>`).join("")}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function filterLivePicks() {
-  if (!latestData) return;
-  const q = document.getElementById("search-input").value.toUpperCase();
-  const filterVal = document.getElementById("conviction-filter").value;
+  const highCount = picks.filter(p => p.conviction === "HIGH").length;
+  document.getElementById("stat-conviction-count").textContent = highCount;
   
-  let list = latestData.candidates || [];
-  if (q) list = list.filter(c => c.symbol.includes(q));
-  if (filterVal !== "ALL") list = list.filter(c => c.conviction.includes(filterVal));
-  renderTable("live-picks-body", list);
+  const auc = meta.test_roc_auc ? (meta.test_roc_auc * 100).toFixed(1) + "%" : "--";
+  document.getElementById("stat-auc").textContent = auc;
+  
+  const spec = meta.specificity ? (meta.specificity * 100).toFixed(1) + "%" : "--";
+  document.getElementById("stat-specificity").textContent = spec;
 }
 
-function populateHistorySelector(hist) {
-  const sel = document.getElementById("history-date-select");
-  sel.innerHTML = "";
-  if (!hist || hist.length === 0) {
-    sel.innerHTML = "<option>No historical archives found</option>";
-    return;
-  }
-  hist.forEach((session, idx) => {
-    const opt = document.createElement("option");
-    opt.value = idx;
-    opt.textContent = `${session.date} (${session.timestamp}) - ${session.high_conviction_count} Surges Flagged`;
-    sel.appendChild(opt);
-  });
-  loadHistoricalSession(0);
-}
-
-function onHistoryDateChange() {
-  const sel = document.getElementById("history-date-select");
-  loadHistoricalSession(parseInt(sel.value, 10));
-}
-
-function loadHistoricalSession(idx) {
-  const session = historyData[idx];
-  if (!session) return;
-  renderTable("history-picks-body", session.candidates || []);
-}
-
-function renderDiagnostics(data) {
-  const tbody = document.getElementById("models-table-body");
+function renderPicksTable(picks) {
+  const tbody = document.getElementById("picks-table-body");
   if (!tbody) return;
   tbody.innerHTML = "";
-  const models = data.models_summary || {};
-  Object.keys(models).forEach(mName => {
-    const m = models[mName];
+
+  if (!picks || picks.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:24px; color:var(--text-muted);">
+      No high-probability breakout candidates detected for tomorrow under current strict specificity constraints (&ge;95%).
+    </td></tr>`;
+    return;
+  }
+
+  picks.forEach(p => {
     const tr = document.createElement("tr");
+    const tagClass = p.conviction === "HIGH" ? "tag-high" : "tag-moderate";
+    const catalysts = Array.isArray(p.catalysts) ? p.catalysts.join(", ") : (p.catalysts || "--");
+
     tr.innerHTML = `
-      <td><strong>${mName}</strong></td>
-      <td>${(m.test_auc * 100).toFixed(1)}%</td>
-      <td>${(m.test_pr_auc * 100).toFixed(1)}%</td>
-      <td>${(m.specificity * 100).toFixed(1)}%</td>
-      <td>${(m.precision * 100).toFixed(1)}%</td>
-      <td>${(m.sensitivity * 100).toFixed(1)}%</td>
-      <td>${m.opt_threshold.toFixed(3)}</td>
+      <td><strong>${p.symbol}</strong></td>
+      <td><span class="tag ${tagClass}">${p.conviction}</span></td>
+      <td style="color:var(--accent-green); font-weight:700;">${p.surge_probability}%</td>
+      <td>₹${Number(p.current_price).toFixed(2)}</td>
+      <td style="color:var(--accent-red);">₹${Number(p.stop_loss).toFixed(2)}</td>
+      <td style="color:var(--accent-green); font-weight:600;">₹${Number(p.target_1).toFixed(2)}</td>
+      <td style="color:var(--accent-green); font-weight:600;">₹${Number(p.target_2).toFixed(2)}</td>
+      <td style="color:var(--accent-green); font-weight:600;">₹${Number(p.target_3).toFixed(2)}</td>
+      <td>${p.risk_reward_ratio}</td>
+      <td style="font-size:12px; color:var(--text-muted); max-width:300px; white-space:normal;">${catalysts}</td>
     `;
     tbody.appendChild(tr);
   });
+}
 
-  const featBody = document.getElementById("features-table-body");
-  if (!featBody) return;
-  featBody.innerHTML = "";
-  (data.top_features || []).forEach(f => {
+function renderDiagnostics(meta) {
+  const prec = meta.precision ? (meta.precision * 100).toFixed(1) + "%" : "--";
+  const brier = meta.brier_score !== undefined ? meta.brier_score.toFixed(4) : "--";
+  const thresh = meta.calibrated_threshold !== undefined ? meta.calibrated_threshold.toFixed(4) : "--";
+
+  const pEl = document.getElementById("diag-precision");
+  if (pEl) pEl.textContent = prec;
+  const bEl = document.getElementById("diag-brier");
+  if (bEl) bEl.textContent = brier;
+  const tEl = document.getElementById("diag-threshold");
+  if (tEl) tEl.textContent = thresh;
+
+  const mBody = document.getElementById("models-table-body");
+  if (!mBody) return;
+  mBody.innerHTML = "";
+
+  const weights = meta.model_weights || {
+    "XGBoost Classifier": 0.35,
+    "LightGBM Classifier": 0.35,
+    "CatBoost Classifier": 0.20,
+    "Random Forest Classifier": 0.10
+  };
+
+  Object.entries(weights).forEach(([modelName, weight]) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><code>${f.feature}</code></td>
-      <td>
-        <div style="background:#1e293b; border-radius:4px; height:12px; width:100%; overflow:hidden;">
-          <div style="background:#3b82f6; height:100%; width:${(f.importance * 100).toFixed(1)}%;"></div>
-        </div>
-      </td>
-      <td>${(f.importance * 100).toFixed(2)}%</td>
+      <td><strong>${modelName}</strong></td>
+      <td>${(weight * 100).toFixed(1)}%</td>
     `;
-    featBody.appendChild(tr);
+    mBody.appendChild(tr);
   });
 }
 
-function copyPineScript() {
-  const code = document.getElementById("pine-v6-code").innerText;
-  navigator.clipboard.writeText(code).then(() => {
-    const btn = document.getElementById("copy-btn");
-    btn.textContent = "Copied to Clipboard!";
-    setTimeout(() => { btn.textContent = "Copy Pine v6 Script"; }, 2000);
+function populateHistoryDropdown(history) {
+  const select = document.getElementById("history-date-select");
+  if (!select) return;
+  select.innerHTML = "";
+
+  const dates = Object.keys(history).sort().reverse();
+  if (dates.length === 0) {
+    select.innerHTML = `<option value="">No historical archives found</option>`;
+    return;
+  }
+
+  dates.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value = d;
+    opt.textContent = d;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", () => {
+    renderHistoryTable(select.value);
+  });
+
+  if (dates.length > 0) {
+    renderHistoryTable(dates[0]);
+  }
+}
+
+function renderHistoryTable(dateStr) {
+  const tbody = document.getElementById("history-table-body");
+  if (!tbody || !allHistoryData[dateStr]) return;
+
+  tbody.innerHTML = "";
+  const records = allHistoryData[dateStr];
+
+  if (!records || records.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">No signals recorded for ${dateStr}.</td></tr>`;
+    return;
+  }
+
+  records.forEach(r => {
+    const tr = document.createElement("tr");
+    const catalysts = Array.isArray(r.catalysts) ? r.catalysts.join(", ") : (r.catalysts || "--");
+    tr.innerHTML = `
+      <td>${dateStr}</td>
+      <td><strong>${r.symbol}</strong></td>
+      <td style="color:var(--accent-green); font-weight:700;">${r.surge_probability}%</td>
+      <td>₹${Number(r.current_price).toFixed(2)}</td>
+      <td style="color:var(--accent-green);">₹${Number(r.target_1).toFixed(2)}</td>
+      <td style="color:var(--accent-green);">₹${Number(r.target_2).toFixed(2)}</td>
+      <td style="color:var(--accent-green);">₹${Number(r.target_3).toFixed(2)}</td>
+      <td style="color:var(--accent-red);">₹${Number(r.stop_loss).toFixed(2)}</td>
+      <td style="font-size:12px; color:var(--text-muted); max-width:250px; white-space:normal;">${catalysts}</td>
+    `;
+    tbody.appendChild(tr);
   });
 }
 
 // ==============================================================================
-// EXPORT FUNCTIONS (CSV, JPG, PDF)
+// SEARCH AND FILTER
 // ==============================================================================
-function exportToCSV() {
-  if (!latestData || !latestData.candidates || latestData.candidates.length === 0) {
-    alert("No scan data available to export.");
-    return;
+function initSearchAndFilter() {
+  const searchInput = document.getElementById("search-picks");
+  const filterSelect = document.getElementById("filter-conviction");
+
+  function applyFilter() {
+    const query = (searchInput.value || "").toUpperCase().trim();
+    const filterVal = filterSelect.value;
+
+    const filtered = currentPicks.filter(p => {
+      const matchQuery = p.symbol.toUpperCase().includes(query);
+      const matchFilter = filterVal === "ALL" || p.conviction === filterVal;
+      return matchQuery && matchFilter;
+    });
+
+    renderPicksTable(filtered);
   }
 
-  const headers = [
-    "Symbol", "Conviction", "Surge_Probability_Pct", "Current_Price_INR",
-    "Stop_Loss_INR", "Stop_Loss_Pct", "Target_1_INR", "Target_2_INR",
-    "Target_3_INR", "Risk_Reward_Ratio", "Volume_Surge_x", "RSI_14", "Catalysts", "Date"
-  ];
-
-  const rows = latestData.candidates.map(c => [
-    c.symbol,
-    `"${c.conviction}"`,
-    (c.probability * 100).toFixed(1),
-    c.close.toFixed(2),
-    c.stop_loss.toFixed(2),
-    c.stop_loss_pct,
-    c.target_1.toFixed(2),
-    c.target_2.toFixed(2),
-    c.target_3.toFixed(2),
-    c.risk_reward.toFixed(2),
-    c.volume_surge.toFixed(2),
-    c.rsi_14,
-    `"${(c.catalysts || []).join('; ')}"`,
-    c.date
-  ]);
-
-  const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `NSE_Surge_Trades_${latestData.date || 'latest'}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-async function exportToImage() {
-  const captureEl = document.getElementById("capture-table-area");
-  if (!captureEl) return;
-  const btn = document.getElementById("btn-export-jpg");
-  const orig = btn.textContent;
-  btn.textContent = "Generating...";
-  btn.disabled = true;
-
-  try {
-    if (typeof html2canvas === "undefined") {
-      throw new Error("html2canvas library is loading, please try again in a moment.");
-    }
-    const canvas = await html2canvas(captureEl, {
-      backgroundColor: "#0b0f19",
-      scale: 2,
-      useCORS: true
-    });
-    const imgData = canvas.toDataURL("image/jpeg", 0.95);
-    const link = document.createElement("a");
-    link.href = imgData;
-    link.download = `NSE_Surge_Trades_${latestData ? latestData.date : 'latest'}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (err) {
-    console.error("Image export failed:", err);
-    alert("Could not generate JPG image: " + err.message);
-  } finally {
-    btn.textContent = orig;
-    btn.disabled = false;
-  }
-}
-
-async function exportToPDF() {
-  const captureEl = document.getElementById("capture-table-area");
-  if (!captureEl) return;
-  const btn = document.getElementById("btn-export-pdf");
-  const orig = btn.textContent;
-  btn.textContent = "Generating...";
-  btn.disabled = true;
-
-  try {
-    if (typeof html2canvas === "undefined" || !window.jspdf) {
-      throw new Error("PDF export libraries loading, please try again in a moment.");
-    }
-    const canvas = await html2canvas(captureEl, {
-      backgroundColor: "#0b0f19",
-      scale: 2,
-      useCORS: true
-    });
-    const imgData = canvas.toDataURL("image/jpeg", 0.95);
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: "landscape",
-      unit: "px",
-      format: [canvas.width, canvas.height]
-    });
-    pdf.addImage(imgData, "JPEG", 0, 0, canvas.width, canvas.height);
-    pdf.save(`NSE_Surge_Trades_${latestData ? latestData.date : 'latest'}.pdf`);
-  } catch (err) {
-    console.error("PDF export failed:", err);
-    alert("Could not generate PDF: " + err.message);
-  } finally {
-    btn.textContent = orig;
-    btn.disabled = false;
-  }
+  if (searchInput) searchInput.addEventListener("input", applyFilter);
+  if (filterSelect) filterSelect.addEventListener("change", applyFilter);
 }
 
 // ==============================================================================
-// GITHUB ACTIONS LIVE TRIGGER & PROGRESS MONITOR
+// CLIENT-SIDE EXPORTS: CSV, JPG, PDF
 // ==============================================================================
-function openRunModal() {
-  document.getElementById("modal-error-msg").style.display = "none";
-  document.getElementById("run-modal").style.display = "flex";
-}
-
-function closeRunModal() {
-  document.getElementById("run-modal").style.display = "none";
-}
-
-async function triggerWorkflow() {
-  const token = document.getElementById("gh-token-input").value.trim();
-  const limitInput = document.getElementById("limit-tickers-input").value.trim();
-  const errorDiv = document.getElementById("modal-error-msg");
-  const btn = document.getElementById("btn-trigger-action");
-
-  if (!token) {
-    errorDiv.textContent = "Please enter your GitHub Personal Access Token.";
-    errorDiv.style.display = "block";
-    return;
-  }
-
-  localStorage.setItem("gh_pat_token", token);
-  btn.disabled = true;
-  btn.textContent = "Launching Scanner...";
-  errorDiv.style.display = "none";
-
-  const payload = { ref: "main", inputs: {} };
-  if (limitInput) payload.inputs.limit_tickers = limitInput;
-
-  try {
-    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/${WORKFLOW_ID}/dispatches`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Accept": "application/vnd.github+json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (res.status === 204) {
-      closeRunModal();
-      runStartTime = Date.now();
-      showBanner("Workflow Dispatched", "QUEUED", 10);
-      setTimeout(checkActiveWorkflow, 2500);
-    } else {
-      const errJson = await res.json().catch(() => ({}));
-      errorDiv.textContent = errJson.message || `Error ${res.status}: Check token permissions.`;
-      errorDiv.style.display = "block";
-    }
-  } catch (err) {
-    errorDiv.textContent = "Network error: " + err.message;
-    errorDiv.style.display = "block";
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "▶ Launch Scanner Now";
-  }
-}
-
-async function checkActiveWorkflow() {
-  const token = localStorage.getItem("gh_pat_token");
-  const headers = { "Accept": "application/vnd.github+json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  try {
-    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs?per_page=1`;
-    const res = await fetch(url, { headers });
-    if (!res.ok) return;
-    const data = await res.json();
-    if (!data.workflow_runs || data.workflow_runs.length === 0) return;
-
-    const run = data.workflow_runs[0];
-    const isRunning = run.status === "in_progress" || run.status === "queued";
-
-    if (isRunning) {
-      currentActiveRunId = run.id;
-      if (!runStartTime) runStartTime = new Date(run.run_started_at || run.created_at).getTime();
-
-      document.getElementById("live-run-banner").style.display = "block";
-      document.getElementById("live-run-title").textContent = `Workflow #${run.run_number}: Live Scanner`;
-      document.getElementById("live-run-badge").textContent = run.status.toUpperCase();
-      document.getElementById("live-run-link").href = run.html_url;
-
-      const elapsedSec = Math.floor((Date.now() - runStartTime) / 1000);
-      const min = Math.floor(elapsedSec / 60);
-      const sec = elapsedSec % 60;
-      document.getElementById("live-run-timer").textContent = `Active: ${min}m ${sec}s`;
-
-      if (!monitorInterval) {
-        monitorInterval = setInterval(fetchRunJobs, 3000);
+function initExportButtons() {
+  const btnCsv = document.getElementById("btn-export-csv");
+  if (btnCsv) {
+    btnCsv.addEventListener("click", () => {
+      if (!currentPicks || currentPicks.length === 0) {
+        alert("No recommendations to export.");
+        return;
       }
-      fetchRunJobs();
-    } else {
-      if (currentActiveRunId && currentActiveRunId === run.id && run.conclusion === "success") {
-        document.getElementById("live-run-badge").textContent = "SUCCESS";
-        document.getElementById("live-progress-fill").style.width = "100%";
+      let csv = "Symbol,Conviction,Surge Probability,Current Price,Stop Loss,Target 1,Target 2,Target 3,Risk Reward,Catalysts\n";
+      currentPicks.forEach(p => {
+        const catStr = `"${(p.catalysts || []).join('; ')}"`;
+        csv += `${p.symbol},${p.conviction},${p.surge_probability}%,${p.current_price},${p.stop_loss},${p.target_1},${p.target_2},${p.target_3},${p.risk_reward_ratio},${catStr}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `NSE_Surge_Picks_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  }
+
+  const btnJpg = document.getElementById("btn-export-jpg");
+  if (btnJpg) {
+    btnJpg.addEventListener("click", () => {
+      const target = document.getElementById("picks-table-card");
+      if (!target) return;
+      html2canvas(target, { backgroundColor: "#0b0f19" }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = `NSE_Surge_Picks_${new Date().toISOString().slice(0, 10)}.jpg`;
+        link.href = canvas.toDataURL("image/jpeg", 0.95);
+        link.click();
+      });
+    });
+  }
+
+  const btnPdf = document.getElementById("btn-export-pdf");
+  if (btnPdf) {
+    btnPdf.addEventListener("click", () => {
+      const target = document.getElementById("picks-table-card");
+      if (!target) return;
+      html2canvas(target, { backgroundColor: "#0b0f19", scale: 2 }).then(canvas => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("landscape", "pt", "a4");
+        const imgData = canvas.toDataURL("image/png");
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, "PNG", 20, 20, pdfWidth - 40, pdfHeight);
+        pdf.save(`NSE_Surge_Picks_${new Date().toISOString().slice(0, 10)}.pdf`);
+      });
+    });
+  }
+
+  const btnCopyPine = document.getElementById("btn-copy-pine");
+  if (btnCopyPine) {
+    btnCopyPine.addEventListener("click", () => {
+      const code = document.getElementById("pine-code-container").textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btnCopyPine.textContent = "✓ Copied to Clipboard!";
         setTimeout(() => {
-          document.getElementById("live-run-banner").style.display = "none";
-          runStartTime = null;
-          loadData();
-        }, 3500);
-      }
-      if (monitorInterval) {
-        clearInterval(monitorInterval);
-        monitorInterval = null;
-      }
-    }
-  } catch (err) {
-    console.warn("Could not check workflow status:", err);
+          btnCopyPine.textContent = "📋 Copy Script to Clipboard";
+        }, 2000);
+      });
+    });
   }
 }
 
-async function fetchRunJobs() {
-  if (!currentActiveRunId) return;
-  const token = localStorage.getItem("gh_pat_token");
-  const headers = { "Accept": "application/vnd.github+json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+// ==============================================================================
+// WALK-FORWARD BACKTEST DATA LOADER
+// ==============================================================================
+async function loadBacktestData() {
+  try {
+    const resSummary = await fetch("data/backtest_summary.json?t=" + Date.now());
+    if (resSummary.ok) {
+      const summary = await resSummary.json();
+      renderBacktestSummary(summary);
+    }
+  } catch (e) {}
 
   try {
-    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${currentActiveRunId}/jobs`;
-    const res = await fetch(url, { headers });
-    if (!res.ok) return;
-    const data = await res.json();
-    if (!data.jobs || data.jobs.length === 0) return;
-
-    renderStepsList(data.jobs[0].steps || []);
-  } catch (err) {
-    console.warn("Could not fetch jobs:", err);
-  }
-}
-
-function renderStepsList(steps) {
-  const container = document.getElementById("live-steps-list");
-  if (!container) return;
-  container.innerHTML = "";
-
-  let completedCount = 0;
-  steps.forEach(s => {
-    if (s.status === "completed") completedCount++;
-    const div = document.createElement("div");
-    div.className = "live-step-item";
-
-    let icon = "○";
-    let statusClass = "step-pending";
-    if (s.status === "completed") {
-      icon = s.conclusion === "success" ? "✓" : "✗";
-      statusClass = s.conclusion === "success" ? "step-done" : "step-fail";
-    } else if (s.status === "in_progress") {
-      icon = "⟳";
-      statusClass = "step-active";
+    const resTrades = await fetch("data/backtest_trades.json?t=" + Date.now());
+    if (resTrades.ok) {
+      const trades = await resTrades.json();
+      renderBacktestTrades(trades);
     }
+  } catch (e) {}
+}
 
-    div.innerHTML = `<span class="${statusClass}">${icon}</span> <span>${s.name}</span>`;
-    container.appendChild(div);
+function renderBacktestSummary(summary) {
+  if (!summary || summary.error) return;
+  const pnlEl = document.getElementById("bt-net-pnl");
+  if (pnlEl) {
+    pnlEl.textContent = "₹" + Number(summary.net_total_pnl).toLocaleString('en-IN', {minimumFractionDigits: 2});
+    pnlEl.style.color = summary.net_total_pnl >= 0 ? "var(--accent-green)" : "var(--accent-red)";
+  }
+  const pctEl = document.getElementById("bt-net-pct");
+  if (pctEl) pctEl.textContent = `${summary.net_return_pct >= 0 ? '+' : ''}${summary.net_return_pct}% on Initial ₹${summary.initial_capital.toLocaleString('en-IN')}`;
+  
+  const wrEl = document.getElementById("bt-win-rate");
+  if (wrEl) wrEl.textContent = `${summary.win_rate_pct}%`;
+  
+  const wlEl = document.getElementById("bt-win-loss");
+  if (wlEl) wlEl.textContent = `${summary.winning_trades} Wins / ${summary.losing_trades} Losses`;
+  
+  const pfEl = document.getElementById("bt-profit-factor");
+  if (pfEl) pfEl.textContent = summary.profit_factor;
+  
+  const ddEl = document.getElementById("bt-max-dd");
+  if (ddEl) ddEl.textContent = `${summary.max_drawdown_pct}%`;
+  
+  const ddInrEl = document.getElementById("bt-max-dd-inr");
+  if (ddInrEl) ddInrEl.textContent = `₹${Math.abs(summary.max_drawdown_inr).toLocaleString('en-IN', {minimumFractionDigits: 2})} Drawdown`;
+  
+  const chgEl = document.getElementById("bt-charges");
+  if (chgEl) chgEl.textContent = "₹" + Number(summary.total_paytm_charges).toLocaleString('en-IN', {minimumFractionDigits: 2});
+}
+
+function renderBacktestTrades(trades) {
+  const tbody = document.getElementById("backtest-trades-body");
+  if (!tbody || !trades || trades.length === 0) return;
+  tbody.innerHTML = "";
+  
+  trades.slice(0, 250).forEach(t => {
+    const tr = document.createElement("tr");
+    const pnlColor = t.net_pnl >= 0 ? "var(--accent-green)" : "var(--accent-red)";
+    const outlay = t.total_outlay_with_fees || ((t.open_entry * t.qty) + t.charges);
+    tr.innerHTML = `
+      <td>${t.date}</td>
+      <td><strong>${t.symbol}</strong></td>
+      <td>${t.surge_prob}%</td>
+      <td>₹${t.open_entry.toFixed(2)}</td>
+      <td>${t.qty}</td>
+      <td style="font-weight:600; color:var(--text-main);">₹${outlay.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+      <td>₹${t.exit_price.toFixed(2)}</td>
+      <td><span class="tag">${t.exit_reason}</span></td>
+      <td style="color:${t.gross_pnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">₹${t.gross_pnl.toFixed(2)}</td>
+      <td style="color:var(--text-muted)">₹${t.charges.toFixed(2)}</td>
+      <td style="color:${pnlColor}; font-weight:700;">₹${t.net_pnl.toFixed(2)}</td>
+      <td style="color:${pnlColor}; font-weight:700;">${t.net_return_pct >= 0 ? '+' : ''}${t.net_return_pct}%</td>
+    `;
+    tbody.appendChild(tr);
   });
-
-  const pct = Math.min(100, Math.round((completedCount / Math.max(1, steps.length)) * 100));
-  document.getElementById("live-progress-fill").style.width = pct + "%";
 }
-
-function showBanner(title, badge, pct) {
-  document.getElementById("live-run-banner").style.display = "block";
-  document.getElementById("live-run-title").textContent = title;
-  document.getElementById("live-run-badge").textContent = badge;
-  document.getElementById("live-progress-fill").style.width = pct + "%";
-}
+  
