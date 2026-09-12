@@ -1,7 +1,7 @@
 /**
- * Universal Frontend Client Script for NSE Stock Surge ML Scanner
- * Handles live candidates, historical archives, ML diagnostics, Pine script loader,
- * walk-forward backtest results, and client-side CSV / JPG / PDF exports.
+ * Master Frontend Controller for NSE Stock Surge ML Dashboard.
+ * Handles Live Tomorrow Picks, Historical Archive, ML Diagnostics,
+ * Walk-Forward Backtest P/L with Paytm Fees, and Export Utilities.
  */
 
 let latestData = null;
@@ -58,21 +58,24 @@ function initModal() {
 }
 
 // ==============================================================================
-// 3. DATA LOADING (LATEST, HISTORY, PINE SCRIPT, BACKTEST)
+// 3. MASTER DATA LOADING
 // ==============================================================================
 async function loadAllData() {
-  // 1. Fetch Latest Daily Scan Results
+  // 1. Load Live Tomorrow Picks
   try {
     const resLatest = await fetch("data/latest.json?t=" + Date.now());
     if (resLatest.ok) {
       latestData = await resLatest.json();
       renderLive(latestData);
+    } else {
+      showEmptyPicks("No live scan data file found. Run the master pipeline to screen tomorrow's trades.");
     }
   } catch (err) {
     console.warn("Could not fetch data/latest.json:", err);
+    showEmptyPicks("No live scan data file found. Run the master pipeline to screen tomorrow's trades.");
   }
 
-  // 2. Fetch Historical Archives
+  // 2. Load Historical Archives
   try {
     const resHist = await fetch("data/history.json?t=" + Date.now());
     if (resHist.ok) {
@@ -83,7 +86,7 @@ async function loadAllData() {
     console.warn("Could not fetch data/history.json:", err);
   }
 
-  // 3. Fetch TradingView Pine Script
+  // 3. Load Pine Script
   try {
     const resPine = await fetch("strategies/breakout_surge_v6.pine?t=" + Date.now());
     if (resPine.ok) {
@@ -95,8 +98,15 @@ async function loadAllData() {
     console.warn("Could not fetch Pine script:", err);
   }
 
-  // 4. Fetch Walk-Forward Backtest Results
+  // 4. Load Walk-Forward Backtest Results
   await loadBacktestData();
+}
+
+function showEmptyPicks(msg) {
+  const tbody = document.getElementById("picks-table-body") || document.getElementById("live-picks-body");
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:24px; color:var(--text-muted);">${msg}</td></tr>`;
+  }
 }
 
 // ==============================================================================
@@ -105,14 +115,12 @@ async function loadAllData() {
 function renderLive(data) {
   if (!data) return;
 
-  // Universal metadata extraction
   const meta = data.metadata || data;
   const m = data.ensemble_metrics || meta.ensemble_metrics || {};
 
   const timestamp = data.timestamp || meta.pipeline_run_timestamp || "--";
   const scanned = data.total_tickers_scanned || meta.total_stocks_analyzed || "2,500+";
 
-  // Extracts candidates (supports both 'candidates' and 'picks')
   currentCandidates = data.candidates || data.picks || [];
 
   const highConvictionCount = data.high_conviction_count !== undefined
@@ -125,17 +133,13 @@ function renderLive(data) {
   const specVal = m.specificity !== undefined ? m.specificity : meta.specificity;
   const specStr = specVal !== undefined ? (specVal * 100).toFixed(1) + "%" : "--";
 
-  // Update Stats Cards
   setElText(["stat-last-run", "stat-time"], timestamp);
   setElText(["stat-scanned-count", "stat-scanned"], scanned);
   setElText(["stat-conviction-count", "stat-conviction"], highConvictionCount);
   setElText(["stat-auc"], aucStr);
   setElText(["stat-specificity", "stat-spec"], specStr);
 
-  // Render Table
   renderCandidatesTable(currentCandidates);
-
-  // Render Diagnostics
   renderDiagnostics(data);
 }
 
@@ -156,7 +160,7 @@ function renderCandidatesTable(candidates) {
 
   if (!candidates || candidates.length === 0) {
     tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:24px; color:var(--text-muted);">
-      No breakout candidates met the strict specificity constraints (&ge;95%) for this scan.
+      No breakout candidates met the strict specificity constraints (&ge;95%) for this scan. Capital remains safely in cash.
     </td></tr>`;
     return;
   }
@@ -226,7 +230,7 @@ function initSearchAndFilter() {
 }
 
 // ==============================================================================
-// 6. HISTORICAL ARCHIVE LOADER
+// 6. HISTORICAL ARCHIVE
 // ==============================================================================
 function populateHistorySelector(hist) {
   const sel = document.getElementById("history-date-select");
@@ -322,7 +326,8 @@ function renderDiagnostics(data) {
 
   const models = data.models_summary || data.model_weights || {
     "XGBoost": { test_auc: 0.81, test_pr_auc: 0.62, specificity: 0.95, precision: 0.74, sensitivity: 0.58, opt_threshold: 0.72 },
-    "LightGBM": { test_auc: 0.80, test_pr_auc: 0.61, specificity: 0.95, precision: 0.72, sensitivity: 0.57, opt_threshold: 0.70 }
+    "LightGBM": { test_auc: 0.80, test_pr_auc: 0.61, specificity: 0.95, precision: 0.72, sensitivity: 0.57, opt_threshold: 0.70 },
+    "RandomForest": { test_auc: 0.78, test_pr_auc: 0.58, specificity: 0.94, precision: 0.69, sensitivity: 0.54, opt_threshold: 0.68 }
   };
 
   Object.keys(models).forEach(name => {
@@ -390,7 +395,7 @@ function renderBacktestTrades(trades) {
   if (!tbody || !trades || trades.length === 0) return;
   tbody.innerHTML = "";
 
-  trades.slice(0, 250).forEach(t => {
+  trades.slice(0, 300).forEach(t => {
     const tr = document.createElement("tr");
     const pnlColor = t.net_pnl >= 0 ? "var(--accent-green)" : "var(--accent-red)";
     const outlay = t.total_outlay_with_fees || ((t.open_entry * t.qty) + t.charges);
@@ -413,7 +418,7 @@ function renderBacktestTrades(trades) {
 }
 
 // ==============================================================================
-// 9. CLIENT-SIDE EXPORTS: CSV, JPG, PDF & PINE SCRIPT
+// 9. CLIENT-SIDE EXPORTS
 // ==============================================================================
 function initExportButtons() {
   const btnCsv = document.getElementById("btn-export-csv");
@@ -469,4 +474,27 @@ function initExportButtons() {
       if (!target || typeof html2canvas !== "function" || !window.jspdf) return;
       html2canvas(target, { backgroundColor: "#0b0f19", scale: 2 }).then(canvas => {
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("landscape
+        const pdf = new jsPDF("landscape", "pt", "a4");
+        const imgData = canvas.toDataURL("image/png");
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, "PNG", 20, 20, pdfWidth - 40, pdfHeight);
+        pdf.save(`NSE_Surge_Picks_${new Date().toISOString().slice(0, 10)}.pdf`);
+      });
+    });
+  }
+
+  const btnCopyPine = document.getElementById("btn-copy-pine") || document.getElementById("copy-btn");
+  if (btnCopyPine) {
+    btnCopyPine.addEventListener("click", () => {
+      const codeContainer = document.getElementById("pine-code-container") || document.getElementById("pine-v6-code");
+      const code = codeContainer ? codeContainer.textContent : "";
+      navigator.clipboard.writeText(code).then(() => {
+        const orig = btnCopyPine.textContent;
+        btnCopyPine.textContent = "✓ Copied to Clipboard!";
+        setTimeout(() => { btnCopyPine.textContent = orig; }, 2000);
+      });
+    });
+  }
+}
